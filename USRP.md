@@ -1,6 +1,6 @@
 [Manual Book](https://www.ni.com/docs/en-US/bundle/usrp-2974-getting-started/page/overview.html#)
 
-- Go to ni.com/info and search NIPMDownload and download NI package management.
+- Go to [here](ni.com/info) and search NIPMDownload and download NI package management.
   
 - Use the NI package marnagement download LabVIEW Communications System Design Suite
   
