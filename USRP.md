@@ -7,4 +7,6 @@
 3. Open the NI NXG. Now we can configure the USRP. [Labview NXG Start Video](https://www.youtube.com/watch?v=9lY_wgf4w40)
 
 > LabView NXG use G Web Development Software. [Getting Start with G Web](https://www.ni.com/docs/zh-CN/bundle/getting-started-with-labview-nxg/page/gslv.html)
+>
+> NI also have some example in the github, which have more details.[GitHub Link](https://github.com/ni/webvi-examples)
  
