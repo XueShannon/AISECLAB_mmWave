@@ -8,5 +8,5 @@
 
 > LabView NXG use G Web Development Software. [Getting Start with G Web](https://www.ni.com/docs/zh-CN/bundle/getting-started-with-labview-nxg/page/gslv.html)
 >
-> NI also have some example in the github, which have more details.[GitHub Link](https://github.com/ni/webvi-examples)
+> NI also has some examples in the github, which have more details.[GitHub Link](https://github.com/ni/webvi-examples)
  
