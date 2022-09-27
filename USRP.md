@@ -9,4 +9,6 @@
 > LabView NXG use G Web Development Software. [Getting Start with G Web](https://www.ni.com/docs/zh-CN/bundle/getting-started-with-labview-nxg/page/gslv.html)
 >
 > NI also has some examples in the github, which have more details.[GitHub Link](https://github.com/ni/webvi-examples)
+>
+> Don't know the reason why. The ip address of USRP-2497 must be set to **169.254.10.85**. Or the computer can't find the device
  
