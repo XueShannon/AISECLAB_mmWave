@@ -15,4 +15,10 @@
 > Don't know the reason why. The ip address of USRP-2497 must be set to **169.254.10.85**. Or the computer can't find the device
 >
 >For the example in the sample project. When you change the configuration of the USRP, you must restart the program or the change can't take any effect.
+
+
+
+# Signal generating
+In it's provided driver. They use **Generate Waveform** VI to generate the signal. We can modify this file to generate the signal we want.
  
+ ![图片alt](./image/LabView/Conifgure_TX-Generate_Waveform.png "图片title")
