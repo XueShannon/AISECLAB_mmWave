@@ -16,9 +16,14 @@
 >
 >For the example in the sample project. When you change the configuration of the USRP, you must restart the program or the change can't take any effect.
 
+---
 
-
-# Signal generating
+## Signal generating
 In it's provided driver. They use **Generate Waveform** VI to generate the signal. We can modify this file to generate the signal we want.
  
  ![图片alt](./image/LabView/Conifgure_TX-Generate_Waveform.png "图片title")
+
+In this USRP, the driver directly obtains a one-dimensional integer array as the input of iq signal, so we need to generate a one-dimensional array ourselves to generate the signal we need.
+ ![图片alt](./image/LabView/IQ%20input.png "图片title")
+
+At the same time, ni nxg software does not provide complete modules to modulate and demodulate signals like other software. It only provides fragments of many puzzles. As for complete functions, you need to build them yourself Here I found the relevant videos modulated by labview ask. Although the versions are different, the corresponding components have.[ASK Modulation and Demodulation using Labview2018](https://www.youtube.com/watch?v=S5m7Y4H8jtA)
