@@ -340,7 +340,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1160, 672.0]
+    coordinate: [1168, 672.0]
     rotation: 0
     state: true
 - name: blocks_float_to_complex_0
@@ -376,7 +376,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [985, 493]
+    coordinate: [1056, 384.0]
     rotation: 0
     state: true
 - name: blocks_multiply_xx_0
@@ -406,14 +406,14 @@ blocks:
     ignoretag: 'True'
     maxoutbuf: '0'
     minoutbuf: '0'
-    samples_per_second: 22e6
+    samples_per_second: 2.2e6
     type: byte
     vlen: '1'
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [753, 353]
+    coordinate: [696, 388.0]
     rotation: 0
     state: true
 - name: blocks_uchar_to_float_0_0_1_0
@@ -428,41 +428,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [760, 496.0]
+    coordinate: [680, 640.0]
     rotation: 0
     state: enabled
-- name: blocks_unpack_k_bits_bb_0
-  id: blocks_unpack_k_bits_bb
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    k: bits_per_pack
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [107, 352]
-    rotation: 180
-    state: true
-- name: blocks_unpack_k_bits_bb_0_0
-  id: blocks_unpack_k_bits_bb
-  parameters:
-    affinity: ''
-    alias: ''
-    comment: ''
-    k: bits_per_clock
-    maxoutbuf: '0'
-    minoutbuf: '0'
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [125, 584]
-    rotation: 180
-    state: true
 - name: blocks_vector_insert_x_0
   id: blocks_vector_insert_x
   parameters:
@@ -472,7 +440,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
-    period: periodicity
+    period: 320+len(preamble)
     type: byte
     vector: preamble
   states:
@@ -491,7 +459,7 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     offset: '0'
-    period: periodicity+len(interval)
+    period: 326+len(interval)
     type: byte
     vector: interval
   states:
@@ -518,9 +486,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [472, 300.0]
+    coordinate: [608, 252.0]
     rotation: 180
-    state: true
+    state: disabled
 - name: blocks_vector_source_x_0_0_0
   id: blocks_vector_source_x
   parameters:
@@ -538,7 +506,25 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [360, 740.0]
+    coordinate: [160, 636.0]
+    rotation: 180
+    state: true
+- name: blocks_vector_to_stream_0
+  id: blocks_vector_to_stream
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_items: '320'
+    type: byte
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [88, 336.0]
     rotation: 180
     state: true
 - name: blocks_xor_xx_0
@@ -557,6 +543,42 @@ blocks:
     bus_structure: null
     coordinate: [120, 476.0]
     rotation: 0
+    state: true
+- name: epy_block_0
+  id: epy_block
+  parameters:
+    _source_code: "\"\"\"\nEmbedded Python Blocks:\n\nEach time this file is saved,\
+      \ GRC will instantiate the first class it finds\nto get ports and parameters\
+      \ of your block. The arguments to __init__  will\nbe the parameters. All of\
+      \ them are required to have default values!\n\"\"\"\n\nimport numpy as np\n\
+      from gnuradio import gr\nimport hashlib\n\n\nclass blk(gr.sync_block):  # other\
+      \ base classes are basic_block, decim_block, interp_block\n    \"\"\"Embedded\
+      \ Python Block example - a simple multiply const\"\"\"\n\n    def __init__(self,\
+      \ text=\"Enter the text here\"):  # only default arguments here\n        \"\"\
+      \"arguments to this function show up as parameters in GRC\"\"\"\n        gr.sync_block.__init__(\n\
+      \            self,\n            name='Hash encode',   # will show up in GRC\n\
+      \            in_sig=None,\n            out_sig=[(np.byte,320)]\n        )\n\
+      \        # if an attribute with the same name as a parameter is found,\n   \
+      \     # a callback is registered (properties work, too).\n        self.text\
+      \ = text\n\n    def work(self, input_items, output_items):\n        \"\"\"example:\
+      \ multiply with constant\"\"\"\n        result = hashlib.sha1(self.text.encode())\n\
+      \n        list_str = list(bin(int(result.hexdigest(), 16))[2:].zfill(160))\n\
+      \n        byte_array = np.array(list_str, dtype=int).repeat(2)\n\n        output_items[0][:]\
+      \ = byte_array\n\n        return len(output_items[0])\n"
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    text: '"test message"'
+  states:
+    _io_cache: ('Hash encode', 'blk', [('text', "'Enter the text here'")], [], [('0',
+      'byte', 320)], 'Embedded Python Block example - a simple multiply const', ['text'])
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [360, 316.0]
+    rotation: 180
     state: true
 - name: import_0_0
   id: import
@@ -678,6 +700,103 @@ blocks:
     coordinate: [1713, 378]
     rotation: 0
     state: enabled
+- name: qtgui_time_sink_x_0
+  id: qtgui_time_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    alpha1: '1.0'
+    alpha10: '1.0'
+    alpha2: '1.0'
+    alpha3: '1.0'
+    alpha4: '1.0'
+    alpha5: '1.0'
+    alpha6: '1.0'
+    alpha7: '1.0'
+    alpha8: '1.0'
+    alpha9: '1.0'
+    autoscale: 'False'
+    axislabels: 'True'
+    color1: blue
+    color10: dark blue
+    color2: red
+    color3: green
+    color4: black
+    color5: cyan
+    color6: magenta
+    color7: yellow
+    color8: dark red
+    color9: dark green
+    comment: ''
+    ctrlpanel: 'False'
+    entags: 'True'
+    grid: 'False'
+    gui_hint: ''
+    label1: Signal 1
+    label10: Signal 10
+    label2: Signal 2
+    label3: Signal 3
+    label4: Signal 4
+    label5: Signal 5
+    label6: Signal 6
+    label7: Signal 7
+    label8: Signal 8
+    label9: Signal 9
+    legend: 'True'
+    marker1: '-1'
+    marker10: '-1'
+    marker2: '-1'
+    marker3: '-1'
+    marker4: '-1'
+    marker5: '-1'
+    marker6: '-1'
+    marker7: '-1'
+    marker8: '-1'
+    marker9: '-1'
+    name: '""'
+    nconnections: '1'
+    size: '1024'
+    srate: samp_rate
+    stemplot: 'False'
+    style1: '1'
+    style10: '1'
+    style2: '1'
+    style3: '1'
+    style4: '1'
+    style5: '1'
+    style6: '1'
+    style7: '1'
+    style8: '1'
+    style9: '1'
+    tr_chan: '0'
+    tr_delay: '0'
+    tr_level: '0.0'
+    tr_mode: qtgui.TRIG_MODE_FREE
+    tr_slope: qtgui.TRIG_SLOPE_POS
+    tr_tag: '""'
+    type: float
+    update_time: '0.10'
+    width1: '1'
+    width10: '1'
+    width2: '1'
+    width3: '1'
+    width4: '1'
+    width5: '1'
+    width6: '1'
+    width7: '1'
+    width8: '1'
+    width9: '1'
+    ylabel: Amplitude
+    ymax: '1'
+    ymin: '-1'
+    yunit: '""'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [976, 236.0]
+    rotation: 0
+    state: true
 - name: qtgui_time_sink_x_0_0_0
   id: qtgui_time_sink_x
   parameters:
@@ -774,7 +893,7 @@ blocks:
     bus_structure: null
     coordinate: [1320, 296.0]
     rotation: 0
-    state: true
+    state: disabled
 - name: qtgui_time_sink_x_3
   id: qtgui_time_sink_x
   parameters:
@@ -871,7 +990,7 @@ blocks:
     bus_structure: null
     coordinate: [1864, 677]
     rotation: 0
-    state: true
+    state: disabled
 - name: rational_resampler_xxx_0_0
   id: rational_resampler_xxx
   parameters:
@@ -889,7 +1008,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [752, 632.0]
+    coordinate: [784, 800.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_sink_0
@@ -1005,7 +1124,7 @@ blocks:
     comment: ''
     dev_addr: '"addr = 192.168.10.7"'
     dev_args: ''
-    gain0: '60'
+    gain0: '50'
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -1179,14 +1298,14 @@ connections:
 - [blocks_multiply_xx_0, '0', qtgui_time_sink_x_3, '0']
 - [blocks_multiply_xx_0, '0', uhd_usrp_sink_0, '0']
 - [blocks_throttle_0, '0', blocks_uchar_to_float_0_0_1_0, '0']
+- [blocks_uchar_to_float_0_0_1_0, '0', qtgui_time_sink_x_0, '0']
 - [blocks_uchar_to_float_0_0_1_0, '0', rational_resampler_xxx_0_0, '0']
-- [blocks_unpack_k_bits_bb_0, '0', blocks_xor_xx_0, '0']
-- [blocks_unpack_k_bits_bb_0_0, '0', blocks_xor_xx_0, '1']
 - [blocks_vector_insert_x_0, '0', blocks_vector_insert_x_0_0, '0']
 - [blocks_vector_insert_x_0_0, '0', blocks_throttle_0, '0']
-- [blocks_vector_source_x_0, '0', blocks_unpack_k_bits_bb_0, '0']
-- [blocks_vector_source_x_0_0_0, '0', blocks_unpack_k_bits_bb_0_0, '0']
+- [blocks_vector_source_x_0_0_0, '0', blocks_xor_xx_0, '1']
+- [blocks_vector_to_stream_0, '0', blocks_xor_xx_0, '0']
 - [blocks_xor_xx_0, '0', blocks_vector_insert_x_0, '0']
+- [epy_block_0, '0', blocks_vector_to_stream_0, '0']
 - [rational_resampler_xxx_0_0, '0', blocks_moving_average_xx_0, '0']
 
 metadata:

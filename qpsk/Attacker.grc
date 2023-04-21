@@ -93,6 +93,27 @@ blocks:
     coordinate: [239, 114]
     rotation: 0
     state: enabled
+- name: delay
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '1'
+    stop: '100'
+    value: '0'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1440, 228.0]
+    rotation: 0
+    state: true
 - name: filter_taps
   id: variable
   parameters:
@@ -257,6 +278,25 @@ blocks:
     coordinate: [1919, 564]
     rotation: 180
     state: true
+- name: blocks_delay_0
+  id: blocks_delay
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    delay: delay
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    num_ports: '1'
+    type: complex
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1952, 868.0]
+    rotation: 180
+    state: true
 - name: blocks_file_sink_0
   id: blocks_file_sink
   parameters:
@@ -264,7 +304,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: C:\Users\AISECLAB\Desktop\qpsk\attacker.data
+    file: C:\Users\AISECLAB\Desktop\AISECLAB_mmWave\qpsk\attacker.data
     type: complex
     unbuffered: 'False'
     vlen: '1'
@@ -274,7 +314,7 @@ blocks:
     bus_structure: null
     coordinate: [2160, 956.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: blocks_float_to_complex_0_0
   id: blocks_float_to_complex
   parameters:
@@ -288,7 +328,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [512, 500.0]
+    coordinate: [584, 412.0]
     rotation: 180
     state: enabled
 - name: digital_clock_recovery_mm_xx_0
@@ -687,7 +727,7 @@ blocks:
     coordinate: [1293, 520]
     rotation: 180
     state: true
-- name: uhd_usrp_sink_1
+- name: uhd_usrp_sink_0
   id: uhd_usrp_sink
   parameters:
     affinity: ''
@@ -724,7 +764,7 @@ blocks:
     ant7: '"TX/RX"'
     ant8: '"TX/RX"'
     ant9: '"TX/RX"'
-    bw0: bandwidth
+    bw0: '22000000'
     bw1: '0'
     bw10: '0'
     bw11: '0'
@@ -756,7 +796,7 @@ blocks:
     bw7: '0'
     bw8: '0'
     bw9: '0'
-    center_freq0: centerfreq
+    center_freq0: '2400000000'
     center_freq1: '0'
     center_freq10: '0'
     center_freq11: '0'
@@ -798,9 +838,9 @@ blocks:
     clock_source6: ''
     clock_source7: ''
     comment: ''
-    dev_addr: '"addr = 192.168.10.6"'
+    dev_addr: '"addr=192.168.10.6"'
     dev_args: ''
-    gain0: '50'
+    gain0: '0'
     gain1: '0'
     gain10: '0'
     gain11: '0'
@@ -961,7 +1001,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 308.0]
+    coordinate: [184, 284.0]
     rotation: 180
     state: enabled
 - name: uhd_usrp_source_0
@@ -1141,7 +1181,7 @@ blocks:
     dc_offs_enb9: default
     dev_addr: '"addr = 192.168.10.8"'
     dev_args: ''
-    gain0: '50'
+    gain0: '20'
     gain1: '50'
     gain10: '0'
     gain11: '0'
@@ -1370,7 +1410,7 @@ blocks:
     rx_agc7: Default
     rx_agc8: Default
     rx_agc9: Default
-    samp_rate: sps
+    samp_rate: '2200000'
     sd_spec0: A:0
     sd_spec1: ''
     sd_spec2: ''
@@ -1405,7 +1445,8 @@ connections:
 - [analog_pll_carriertracking_cc_0, '0', freq_xlating_fir_filter_xxx_0, '0']
 - [blocks_complex_to_mag_squared_0, '0', digital_clock_recovery_mm_xx_0, '0']
 - [blocks_complex_to_mag_squared_0_0, '0', digital_clock_recovery_mm_xx_0_0, '0']
-- [blocks_float_to_complex_0_0, '0', uhd_usrp_sink_1, '0']
+- [blocks_delay_0, '0', digital_corr_est_cc_0, '0']
+- [blocks_float_to_complex_0_0, '0', uhd_usrp_sink_0, '0']
 - [digital_clock_recovery_mm_xx_0, '0', blocks_float_to_complex_0_0, '0']
 - [digital_clock_recovery_mm_xx_0, '0', qtgui_sink_x_1_0_0_0, '0']
 - [digital_clock_recovery_mm_xx_0, '0', qtgui_time_sink_x_0, '0']
@@ -1413,8 +1454,8 @@ connections:
 - [digital_corr_est_cc_0, '0', analog_pll_carriertracking_cc_0, '0']
 - [freq_xlating_fir_filter_xxx_0, '0', blocks_complex_to_mag_squared_0, '0']
 - [uhd_usrp_source_0, '0', blocks_complex_to_mag_squared_0_0, '0']
+- [uhd_usrp_source_0, '0', blocks_delay_0, '0']
 - [uhd_usrp_source_0, '0', blocks_file_sink_0, '0']
-- [uhd_usrp_source_0, '0', digital_corr_est_cc_0, '0']
 
 metadata:
   file_format: 1

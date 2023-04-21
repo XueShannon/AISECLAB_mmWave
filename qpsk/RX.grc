@@ -264,7 +264,7 @@ blocks:
     alias: ''
     append: 'False'
     comment: ''
-    file: C:\Users\AISECLAB\Desktop\qpsk\rx_combine.data
+    file: C:\Users\AISECLAB\Desktop\AISECLAB_mmWave\qpsk\attacker_rx2_only.data
     type: complex
     unbuffered: 'False'
     vlen: '1'

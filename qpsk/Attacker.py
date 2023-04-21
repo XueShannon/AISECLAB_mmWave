@@ -95,6 +95,7 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.samp_rate_clock = samp_rate_clock = samp_rate*2
         self.preamble = preamble = [1,1,0,0,1,1]
         self.filter_taps = filter_taps = firdes.low_pass(1,samp_rate,samp_rate/(2*decimation), transition_bw)
+        self.delay = delay = 0
         self.centerfreq = centerfreq = 2400000000
         self.bits_per_pack = bits_per_pack = 1
         self.bits_per_clock = bits_per_clock = 1
@@ -110,6 +111,9 @@ class Attacker(gr.top_block, Qt.QWidget):
         self._sps_range = Range(1, 500, 1, 100, 200)
         self._sps_win = RangeWidget(self._sps_range, self.set_sps, "sample/symbol", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._sps_win)
+        self._delay_range = Range(0, 100, 1, 0, 200)
+        self._delay_win = RangeWidget(self._delay_range, self.set_delay, "'delay'", "counter_slider", float, QtCore.Qt.Horizontal)
+        self.top_layout.addWidget(self._delay_win)
         self.uhd_usrp_source_0 = uhd.usrp_source(
             ",".join(("addr = 192.168.10.8", '', "master_clock_rate=120e6")),
             uhd.stream_args(
@@ -121,18 +125,18 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.uhd_usrp_source_0.set_clock_source('external', 0)
         self.uhd_usrp_source_0.set_time_source('external', 0)
         self.uhd_usrp_source_0.set_subdev_spec('A:0', 0)
-        self.uhd_usrp_source_0.set_samp_rate(sps)
+        self.uhd_usrp_source_0.set_samp_rate(2200000)
         self.uhd_usrp_source_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
         self.uhd_usrp_source_0.set_center_freq(centerfreq, 0)
         self.uhd_usrp_source_0.set_antenna("RX2", 0)
         self.uhd_usrp_source_0.set_bandwidth(bandwidth, 0)
         self.uhd_usrp_source_0.set_rx_agc(False, 0)
-        self.uhd_usrp_source_0.set_gain(50, 0)
+        self.uhd_usrp_source_0.set_gain(20, 0)
         self.uhd_usrp_source_0.set_auto_dc_offset(True, 0)
         self.uhd_usrp_source_0.set_auto_iq_balance(True, 0)
-        self.uhd_usrp_sink_1 = uhd.usrp_sink(
-            ",".join(("addr = 192.168.10.6", '', "master_clock_rate=120e6")),
+        self.uhd_usrp_sink_0 = uhd.usrp_sink(
+            ",".join(("addr=192.168.10.6", '', "master_clock_rate=120e6")),
             uhd.stream_args(
                 cpu_format="fc32",
                 args='',
@@ -140,15 +144,15 @@ class Attacker(gr.top_block, Qt.QWidget):
             ),
             "",
         )
-        self.uhd_usrp_sink_1.set_clock_source('external', 0)
-        self.uhd_usrp_sink_1.set_time_source('external', 0)
-        self.uhd_usrp_sink_1.set_samp_rate(samp_rate)
-        self.uhd_usrp_sink_1.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
+        self.uhd_usrp_sink_0.set_clock_source('external', 0)
+        self.uhd_usrp_sink_0.set_time_source('external', 0)
+        self.uhd_usrp_sink_0.set_samp_rate(samp_rate)
+        self.uhd_usrp_sink_0.set_time_now(uhd.time_spec(time.time()), uhd.ALL_MBOARDS)
 
-        self.uhd_usrp_sink_1.set_center_freq(centerfreq, 0)
-        self.uhd_usrp_sink_1.set_antenna("TX/RX", 0)
-        self.uhd_usrp_sink_1.set_bandwidth(bandwidth, 0)
-        self.uhd_usrp_sink_1.set_gain(50, 0)
+        self.uhd_usrp_sink_0.set_center_freq(2400000000, 0)
+        self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
+        self.uhd_usrp_sink_0.set_bandwidth(22000000, 0)
+        self.uhd_usrp_sink_0.set_gain(0, 0)
         self.qtgui_time_sink_x_0_0 = qtgui.time_sink_f(
             1024, #size
             samp_rate, #samp_rate
@@ -268,6 +272,9 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.digital_clock_recovery_mm_xx_0_0 = digital.clock_recovery_mm_ff(1, (0.25*0.175*0.175), 0.5, 0.175, 0.005)
         self.digital_clock_recovery_mm_xx_0 = digital.clock_recovery_mm_ff(1, (0.25*0.175*0.175), 0.5, 0.175, 0.005)
         self.blocks_float_to_complex_0_0 = blocks.float_to_complex(1)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'C:\\Users\\AISECLAB\\Desktop\\AISECLAB_mmWave\\qpsk\\attacker.data', False)
+        self.blocks_file_sink_0.set_unbuffered(False)
+        self.blocks_delay_0 = blocks.delay(gr.sizeof_gr_complex*1, delay)
         self.blocks_complex_to_mag_squared_0_0 = blocks.complex_to_mag_squared(1)
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(1)
         self.analog_pll_carriertracking_cc_0 = analog.pll_carriertracking_cc(0.05, (2*math.pi*centerfreq/samp_rate), (-2*math.pi*centerfreq/samp_rate))
@@ -279,7 +286,8 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.connect((self.analog_pll_carriertracking_cc_0, 0), (self.freq_xlating_fir_filter_xxx_0, 0))
         self.connect((self.blocks_complex_to_mag_squared_0, 0), (self.digital_clock_recovery_mm_xx_0, 0))
         self.connect((self.blocks_complex_to_mag_squared_0_0, 0), (self.digital_clock_recovery_mm_xx_0_0, 0))
-        self.connect((self.blocks_float_to_complex_0_0, 0), (self.uhd_usrp_sink_1, 0))
+        self.connect((self.blocks_delay_0, 0), (self.digital_corr_est_cc_0, 0))
+        self.connect((self.blocks_float_to_complex_0_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.blocks_float_to_complex_0_0, 0))
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.qtgui_sink_x_1_0_0_0, 0))
         self.connect((self.digital_clock_recovery_mm_xx_0, 0), (self.qtgui_time_sink_x_0, 0))
@@ -287,7 +295,8 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.connect((self.digital_corr_est_cc_0, 0), (self.analog_pll_carriertracking_cc_0, 0))
         self.connect((self.freq_xlating_fir_filter_xxx_0, 0), (self.blocks_complex_to_mag_squared_0, 0))
         self.connect((self.uhd_usrp_source_0, 0), (self.blocks_complex_to_mag_squared_0_0, 0))
-        self.connect((self.uhd_usrp_source_0, 0), (self.digital_corr_est_cc_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.blocks_delay_0, 0))
+        self.connect((self.uhd_usrp_source_0, 0), (self.blocks_file_sink_0, 0))
 
 
     def closeEvent(self, event):
@@ -316,7 +325,7 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.analog_pll_carriertracking_cc_0.set_min_freq((-2*math.pi*self.centerfreq/self.samp_rate))
         self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.qtgui_time_sink_x_0_0.set_samp_rate(self.samp_rate)
-        self.uhd_usrp_sink_1.set_samp_rate(self.samp_rate)
+        self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
 
     def get_decimation(self):
         return self.decimation
@@ -343,7 +352,6 @@ class Attacker(gr.top_block, Qt.QWidget):
 
     def set_sps(self, sps):
         self.sps = sps
-        self.uhd_usrp_source_0.set_samp_rate(self.sps)
 
     def get_samp_rate_clock(self):
         return self.samp_rate_clock
@@ -364,6 +372,13 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.filter_taps = filter_taps
         self.freq_xlating_fir_filter_xxx_0.set_taps(self.filter_taps)
 
+    def get_delay(self):
+        return self.delay
+
+    def set_delay(self, delay):
+        self.delay = delay
+        self.blocks_delay_0.set_dly(int(self.delay))
+
     def get_centerfreq(self):
         return self.centerfreq
 
@@ -373,7 +388,6 @@ class Attacker(gr.top_block, Qt.QWidget):
         self.analog_pll_carriertracking_cc_0.set_min_freq((-2*math.pi*self.centerfreq/self.samp_rate))
         self.freq_xlating_fir_filter_xxx_0.set_center_freq(self.centerfreq)
         self.qtgui_sink_x_1_0_0_0.set_frequency_range(self.centerfreq, self.bandwidth)
-        self.uhd_usrp_sink_1.set_center_freq(self.centerfreq, 0)
         self.uhd_usrp_source_0.set_center_freq(self.centerfreq, 0)
         self.uhd_usrp_source_0.set_center_freq(self.centerfreq, 1)
 
@@ -395,7 +409,6 @@ class Attacker(gr.top_block, Qt.QWidget):
     def set_bandwidth(self, bandwidth):
         self.bandwidth = bandwidth
         self.qtgui_sink_x_1_0_0_0.set_frequency_range(self.centerfreq, self.bandwidth)
-        self.uhd_usrp_sink_1.set_bandwidth(self.bandwidth, 0)
         self.uhd_usrp_source_0.set_bandwidth(self.bandwidth, 0)
         self.uhd_usrp_source_0.set_bandwidth(self.bandwidth, 1)
 

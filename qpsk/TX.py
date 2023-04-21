@@ -40,6 +40,7 @@ from gnuradio import uhd
 import time
 from gnuradio.qtgui import Range, RangeWidget
 from PyQt5 import QtCore
+import TX_epy_block_0 as epy_block_0  # embedded python block
 import itertools
 import math
 import numpy
@@ -132,7 +133,7 @@ class TX(gr.top_block, Qt.QWidget):
         self.uhd_usrp_sink_0.set_center_freq(centerfreq, 0)
         self.uhd_usrp_sink_0.set_antenna("TX/RX", 0)
         self.uhd_usrp_sink_0.set_bandwidth(bandwidth, 0)
-        self.uhd_usrp_sink_0.set_gain(60, 0)
+        self.uhd_usrp_sink_0.set_gain(50, 0)
         self._threshold_range = Range(0.001, 1, 0.001, 0.5, 200)
         self._threshold_win = RangeWidget(self._threshold_range, self.set_threshold, "threshold", "counter_slider", float, QtCore.Qt.Horizontal)
         self.top_layout.addWidget(self._threshold_win)
@@ -144,76 +145,25 @@ class TX(gr.top_block, Qt.QWidget):
                 decimation=1,
                 taps=[1],
                 fractional_bw=0)
-        self.qtgui_time_sink_x_3 = qtgui.time_sink_c(
-            4096, #size
+        self.qtgui_time_sink_x_0 = qtgui.time_sink_f(
+            1024, #size
             samp_rate, #samp_rate
-            "data+preamble+ASK", #name
+            "", #name
             1, #number of inputs
             None # parent
         )
-        self.qtgui_time_sink_x_3.set_update_time(0.10)
-        self.qtgui_time_sink_x_3.set_y_axis(-1, 1)
+        self.qtgui_time_sink_x_0.set_update_time(0.10)
+        self.qtgui_time_sink_x_0.set_y_axis(-1, 1)
 
-        self.qtgui_time_sink_x_3.set_y_label('Amplitude', "")
+        self.qtgui_time_sink_x_0.set_y_label('Amplitude', "")
 
-        self.qtgui_time_sink_x_3.enable_tags(True)
-        self.qtgui_time_sink_x_3.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "t0")
-        self.qtgui_time_sink_x_3.enable_autoscale(True)
-        self.qtgui_time_sink_x_3.enable_grid(True)
-        self.qtgui_time_sink_x_3.enable_axis_labels(True)
-        self.qtgui_time_sink_x_3.enable_control_panel(True)
-        self.qtgui_time_sink_x_3.enable_stem_plot(False)
-
-
-        labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
-            'Signal 6', 'Signal 7', 'Signal 8', 'Signal 9', 'Signal 10']
-        widths = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        colors = ['blue', 'red', 'green', 'black', 'cyan',
-            'magenta', 'yellow', 'dark red', 'dark green', 'dark blue']
-        alphas = [1.0, 1.0, 1.0, 1.0, 1.0,
-            1.0, 1.0, 1.0, 1.0, 1.0]
-        styles = [1, 1, 1, 1, 1,
-            1, 1, 1, 1, 1]
-        markers = [-1, -1, -1, -1, -1,
-            -1, -1, -1, -1, -1]
-
-
-        for i in range(2):
-            if len(labels[i]) == 0:
-                if (i % 2 == 0):
-                    self.qtgui_time_sink_x_3.set_line_label(i, "Re{{Data {0}}}".format(i/2))
-                else:
-                    self.qtgui_time_sink_x_3.set_line_label(i, "Im{{Data {0}}}".format(i/2))
-            else:
-                self.qtgui_time_sink_x_3.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_3.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_3.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_3.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_3.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_3.set_line_alpha(i, alphas[i])
-
-        self._qtgui_time_sink_x_3_win = sip.wrapinstance(self.qtgui_time_sink_x_3.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_3_win)
-        self.qtgui_time_sink_x_0_0_0 = qtgui.time_sink_f(
-            4096, #size
-            samp_rate, #samp_rate
-            "data+preamble", #name
-            1, #number of inputs
-            None # parent
-        )
-        self.qtgui_time_sink_x_0_0_0.set_update_time(0.10)
-        self.qtgui_time_sink_x_0_0_0.set_y_axis(-1, 1)
-
-        self.qtgui_time_sink_x_0_0_0.set_y_label('Amplitude', "")
-
-        self.qtgui_time_sink_x_0_0_0.enable_tags(True)
-        self.qtgui_time_sink_x_0_0_0.set_trigger_mode(qtgui.TRIG_MODE_TAG, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "t0")
-        self.qtgui_time_sink_x_0_0_0.enable_autoscale(True)
-        self.qtgui_time_sink_x_0_0_0.enable_grid(True)
-        self.qtgui_time_sink_x_0_0_0.enable_axis_labels(True)
-        self.qtgui_time_sink_x_0_0_0.enable_control_panel(True)
-        self.qtgui_time_sink_x_0_0_0.enable_stem_plot(False)
+        self.qtgui_time_sink_x_0.enable_tags(True)
+        self.qtgui_time_sink_x_0.set_trigger_mode(qtgui.TRIG_MODE_FREE, qtgui.TRIG_SLOPE_POS, 0.0, 0, 0, "")
+        self.qtgui_time_sink_x_0.enable_autoscale(False)
+        self.qtgui_time_sink_x_0.enable_grid(False)
+        self.qtgui_time_sink_x_0.enable_axis_labels(True)
+        self.qtgui_time_sink_x_0.enable_control_panel(False)
+        self.qtgui_time_sink_x_0.enable_stem_plot(False)
 
 
         labels = ['Signal 1', 'Signal 2', 'Signal 3', 'Signal 4', 'Signal 5',
@@ -232,17 +182,17 @@ class TX(gr.top_block, Qt.QWidget):
 
         for i in range(1):
             if len(labels[i]) == 0:
-                self.qtgui_time_sink_x_0_0_0.set_line_label(i, "Data {0}".format(i))
+                self.qtgui_time_sink_x_0.set_line_label(i, "Data {0}".format(i))
             else:
-                self.qtgui_time_sink_x_0_0_0.set_line_label(i, labels[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_width(i, widths[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_color(i, colors[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_style(i, styles[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_marker(i, markers[i])
-            self.qtgui_time_sink_x_0_0_0.set_line_alpha(i, alphas[i])
+                self.qtgui_time_sink_x_0.set_line_label(i, labels[i])
+            self.qtgui_time_sink_x_0.set_line_width(i, widths[i])
+            self.qtgui_time_sink_x_0.set_line_color(i, colors[i])
+            self.qtgui_time_sink_x_0.set_line_style(i, styles[i])
+            self.qtgui_time_sink_x_0.set_line_marker(i, markers[i])
+            self.qtgui_time_sink_x_0.set_line_alpha(i, alphas[i])
 
-        self._qtgui_time_sink_x_0_0_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0_0_0.qwidget(), Qt.QWidget)
-        self.top_layout.addWidget(self._qtgui_time_sink_x_0_0_0_win)
+        self._qtgui_time_sink_x_0_win = sip.wrapinstance(self.qtgui_time_sink_x_0.qwidget(), Qt.QWidget)
+        self.top_layout.addWidget(self._qtgui_time_sink_x_0_win)
         self.qtgui_sink_x_1_0_0 = qtgui.sink_c(
             4096, #fftsize
             window.WIN_BLACKMAN_hARRIS, #wintype
@@ -261,15 +211,14 @@ class TX(gr.top_block, Qt.QWidget):
         self.qtgui_sink_x_1_0_0.enable_rf_freq(True)
 
         self.top_layout.addWidget(self._qtgui_sink_x_1_0_0_win)
+        self.epy_block_0 = epy_block_0.blk(text="test message")
         self.blocks_xor_xx_0 = blocks.xor_bb()
+        self.blocks_vector_to_stream_0 = blocks.vector_to_stream(gr.sizeof_char*1, 320)
         self.blocks_vector_source_x_0_0_0 = blocks.vector_source_b([int(x) for x in clock], True, 1, [tag_clock])
-        self.blocks_vector_source_x_0 = blocks.vector_source_b(MC_data, True, 1, [tag_message])
-        self.blocks_vector_insert_x_0_0 = blocks.vector_insert_b(interval, (periodicity+len(interval)), 0)
-        self.blocks_vector_insert_x_0 = blocks.vector_insert_b(preamble, periodicity, 0)
-        self.blocks_unpack_k_bits_bb_0_0 = blocks.unpack_k_bits_bb(bits_per_clock)
-        self.blocks_unpack_k_bits_bb_0 = blocks.unpack_k_bits_bb(bits_per_pack)
+        self.blocks_vector_insert_x_0_0 = blocks.vector_insert_b(interval, (326+len(interval)), 0)
+        self.blocks_vector_insert_x_0 = blocks.vector_insert_b(preamble, (320+len(preamble)), 0)
         self.blocks_uchar_to_float_0_0_1_0 = blocks.uchar_to_float()
-        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_char*1, 22e6,True)
+        self.blocks_throttle_0 = blocks.throttle(gr.sizeof_char*1, 2.2e6,True)
         self.blocks_multiply_xx_0 = blocks.multiply_vcc(1)
         self.blocks_moving_average_xx_0 = blocks.moving_average_ff((int(samp_rate/symbol_rate)), 1, 4000, 1)
         self.blocks_float_to_complex_0 = blocks.float_to_complex(1)
@@ -282,19 +231,17 @@ class TX(gr.top_block, Qt.QWidget):
         self.connect((self.analog_sig_source_x_0_0, 0), (self.blocks_multiply_xx_0, 1))
         self.connect((self.blocks_float_to_complex_0, 0), (self.blocks_multiply_xx_0, 0))
         self.connect((self.blocks_moving_average_xx_0, 0), (self.blocks_float_to_complex_0, 0))
-        self.connect((self.blocks_moving_average_xx_0, 0), (self.qtgui_time_sink_x_0_0_0, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_sink_x_1_0_0, 0))
-        self.connect((self.blocks_multiply_xx_0, 0), (self.qtgui_time_sink_x_3, 0))
         self.connect((self.blocks_multiply_xx_0, 0), (self.uhd_usrp_sink_0, 0))
         self.connect((self.blocks_throttle_0, 0), (self.blocks_uchar_to_float_0_0_1_0, 0))
+        self.connect((self.blocks_uchar_to_float_0_0_1_0, 0), (self.qtgui_time_sink_x_0, 0))
         self.connect((self.blocks_uchar_to_float_0_0_1_0, 0), (self.rational_resampler_xxx_0_0, 0))
-        self.connect((self.blocks_unpack_k_bits_bb_0, 0), (self.blocks_xor_xx_0, 0))
-        self.connect((self.blocks_unpack_k_bits_bb_0_0, 0), (self.blocks_xor_xx_0, 1))
         self.connect((self.blocks_vector_insert_x_0, 0), (self.blocks_vector_insert_x_0_0, 0))
         self.connect((self.blocks_vector_insert_x_0_0, 0), (self.blocks_throttle_0, 0))
-        self.connect((self.blocks_vector_source_x_0, 0), (self.blocks_unpack_k_bits_bb_0, 0))
-        self.connect((self.blocks_vector_source_x_0_0_0, 0), (self.blocks_unpack_k_bits_bb_0_0, 0))
+        self.connect((self.blocks_vector_source_x_0_0_0, 0), (self.blocks_xor_xx_0, 1))
+        self.connect((self.blocks_vector_to_stream_0, 0), (self.blocks_xor_xx_0, 0))
         self.connect((self.blocks_xor_xx_0, 0), (self.blocks_vector_insert_x_0, 0))
+        self.connect((self.epy_block_0, 0), (self.blocks_vector_to_stream_0, 0))
         self.connect((self.rational_resampler_xxx_0_0, 0), (self.blocks_moving_average_xx_0, 0))
 
 
@@ -330,8 +277,7 @@ class TX(gr.top_block, Qt.QWidget):
         self.analog_sig_source_x_0_0.set_sampling_freq(self.samp_rate)
         self.analog_sig_source_x_0_0.set_frequency((self.samp_rate/500))
         self.blocks_moving_average_xx_0.set_length_and_scale((int(self.samp_rate/self.symbol_rate)), 1)
-        self.qtgui_time_sink_x_0_0_0.set_samp_rate(self.samp_rate)
-        self.qtgui_time_sink_x_3.set_samp_rate(self.samp_rate)
+        self.qtgui_time_sink_x_0.set_samp_rate(self.samp_rate)
         self.uhd_usrp_sink_0.set_samp_rate(self.samp_rate)
 
     def get_preamble(self):
@@ -354,7 +300,6 @@ class TX(gr.top_block, Qt.QWidget):
     def set_MC_data(self, MC_data):
         self.MC_data = MC_data
         self.set_periodicity(len(self.MC_data)+len(self.preamble))
-        self.blocks_vector_source_x_0.set_data(self.MC_data, [self.tag_message])
 
     def get_threshold(self):
         return self.threshold
@@ -367,7 +312,6 @@ class TX(gr.top_block, Qt.QWidget):
 
     def set_tag_message(self, tag_message):
         self.tag_message = tag_message
-        self.blocks_vector_source_x_0.set_data(self.MC_data, [self.tag_message])
 
     def get_tag_clock(self):
         return self.tag_clock

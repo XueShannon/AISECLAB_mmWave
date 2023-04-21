@@ -250,7 +250,7 @@ class RX(gr.top_block, Qt.QWidget):
         self.digital_clock_recovery_mm_xx_0_0 = digital.clock_recovery_mm_ff(1, (0.25*0.175*0.175), 0.5, 0.175, 0.005)
         self.digital_clock_recovery_mm_xx_0 = digital.clock_recovery_mm_ff(1, (0.25*0.175*0.175), 0.5, 0.175, 0.005)
         self.blocks_threshold_ff_0_0 = blocks.threshold_ff(0.0001, threshold, 0)
-        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'C:\\Users\\AISECLAB\\Desktop\\qpsk\\rx_combine.data', False)
+        self.blocks_file_sink_0 = blocks.file_sink(gr.sizeof_gr_complex*1, 'C:\\Users\\AISECLAB\\Desktop\\AISECLAB_mmWave\\qpsk\\attacker_rx2_only.data', False)
         self.blocks_file_sink_0.set_unbuffered(False)
         self.blocks_complex_to_mag_squared_0_0 = blocks.complex_to_mag_squared(1)
         self.blocks_complex_to_mag_squared_0 = blocks.complex_to_mag_squared(1)
