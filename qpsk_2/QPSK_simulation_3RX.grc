@@ -378,7 +378,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 496.0]
+    coordinate: [896, 460.0]
     rotation: 0
     state: enabled
 - name: blocks_char_to_float_0_0_0
@@ -395,7 +395,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 572.0]
+    coordinate: [664, 620.0]
     rotation: 0
     state: enabled
 - name: blocks_char_to_float_0_0_1
@@ -448,7 +448,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1008, 568.0]
+    coordinate: [936, 620.0]
     rotation: 0
     state: enabled
 - name: blocks_delay_0_0
@@ -646,7 +646,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 496.0]
+    coordinate: [608, 508.0]
     rotation: 0
     state: enabled
 - name: blocks_unpack_k_bits_bb_0_0
@@ -662,7 +662,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [680, 576.0]
+    coordinate: [480, 556.0]
     rotation: 0
     state: enabled
 - name: blocks_unpack_k_bits_bb_0_1
@@ -714,7 +714,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [208, 188.0]
+    coordinate: [240, 196.0]
     rotation: 0
     state: enabled
 - name: digital_constellation_modulator_0
@@ -736,7 +736,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [576, 180.0]
+    coordinate: [616, 184.0]
     rotation: 0
     state: enabled
 - name: digital_constellation_receiver_cb_0
@@ -756,7 +756,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1088, 304.0]
+    coordinate: [1432, 340.0]
     rotation: 180
     state: enabled
 - name: digital_constellation_receiver_cb_0_0
@@ -867,7 +867,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [848, 400.0]
+    coordinate: [848, 336.0]
     rotation: 180
     state: enabled
 - name: digital_diff_decoder_bb_0_0
@@ -980,7 +980,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [688, 416.0]
+    coordinate: [624, 396.0]
     rotation: 180
     state: enabled
 - name: digital_map_bb_0_0
@@ -1648,7 +1648,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1128, 472.0]
+    coordinate: [1176, 460.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_sink_0
@@ -2202,7 +2202,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [960, 44.0]
+    coordinate: [1344, 36.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -3510,7 +3510,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [168, 1316.0]
+    coordinate: [112, 1352.0]
     rotation: 0
     state: enabled
 
@@ -3569,3 +3569,4 @@ connections:
 
 metadata:
   file_format: 1
+  grc_version: 3.10.5.1

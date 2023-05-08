@@ -375,7 +375,7 @@ blocks:
     bus_structure: null
     coordinate: [2136, 844.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_multiply_const_vxx_0_0
   id: blocks_multiply_const_vxx
   parameters:
@@ -928,9 +928,9 @@ blocks:
     label8: ''
     label9: ''
     legend: 'True'
-    marker1: '-1'
+    marker1: '0'
     marker10: '-1'
-    marker2: '-1'
+    marker2: '0'
     marker3: '-1'
     marker4: '-1'
     marker5: '-1'
@@ -942,7 +942,7 @@ blocks:
     nconnections: '2'
     size: '128'
     srate: samp_rate
-    stemplot: 'False'
+    stemplot: 'True'
     style1: '1'
     style10: '1'
     style2: '1'
@@ -1886,7 +1886,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [64, 696.0]
+    coordinate: [48, 672.0]
     rotation: 0
     state: enabled
 

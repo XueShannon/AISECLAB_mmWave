@@ -66,7 +66,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [504, 104.0]
+    coordinate: [536, 120.0]
     rotation: 0
     state: enabled
 - name: excess_bw
@@ -99,7 +99,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1112, 4.0]
+    coordinate: [1072, 8.0]
     rotation: 0
     state: enabled
 - name: nfilts
@@ -132,7 +132,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [992, 4.0]
+    coordinate: [944, 0.0]
     rotation: 0
     state: enabled
 - name: path_loss
@@ -153,7 +153,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [864, 4.0]
+    coordinate: [792, 8.0]
     rotation: 0
     state: enabled
 - name: phase_bw
@@ -186,7 +186,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [272, 20.0]
+    coordinate: [328, 120.0]
     rotation: 0
     state: enabled
 - name: qpsk
@@ -206,7 +206,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [8, 100.0]
+    coordinate: [80, 284.0]
     rotation: 0
     state: enabled
 - name: rrc_taps
@@ -242,7 +242,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [592, 20.0]
+    coordinate: [544, 8.0]
     rotation: 0
     state: enabled
 - name: time_off
@@ -321,6 +321,23 @@ blocks:
     coordinate: [912, 1604.0]
     rotation: 180
     state: true
+- name: blocks_char_to_float_0_0
+  id: blocks_char_to_float
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    scale: '1'
+    vlen: '1'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [648, 1428.0]
+    rotation: 180
+    state: true
 - name: blocks_unpack_k_bits_bb_0
   id: blocks_unpack_k_bits_bb
   parameters:
@@ -334,7 +351,23 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1192, 1604.0]
+    coordinate: [1184, 1588.0]
+    rotation: 180
+    state: true
+- name: blocks_unpack_k_bits_bb_0_0
+  id: blocks_unpack_k_bits_bb
+  parameters:
+    affinity: ''
+    alias: ''
+    comment: ''
+    k: '8'
+    maxoutbuf: '0'
+    minoutbuf: '0'
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [912, 1316.0]
     rotation: 180
     state: true
 - name: blocks_vector_source_x_0_0
@@ -374,9 +407,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [200, 444.0]
+    coordinate: [96, 452.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: blocks_vector_source_x_0_0_0_0
   id: blocks_vector_source_x
   parameters:
@@ -394,7 +427,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [136, 708.0]
+    coordinate: [184, 676.0]
     rotation: 0
     state: enabled
 - name: digital_constellation_modulator_0
@@ -438,9 +471,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 436.0]
+    coordinate: [464, 496.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: digital_constellation_modulator_0_0_0
   id: digital_constellation_modulator
   parameters:
@@ -460,7 +493,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [440, 628.0]
+    coordinate: [664, 720.0]
     rotation: 0
     state: enabled
 - name: digital_constellation_receiver_cb_0
@@ -480,7 +513,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1720, 1236.0]
+    coordinate: [1744, 1204.0]
     rotation: 0
     state: true
 - name: digital_costas_loop_cc_0
@@ -536,7 +569,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 1084.0]
+    coordinate: [952, 1068.0]
     rotation: 0
     state: enabled
 - name: digital_map_bb_0
@@ -552,7 +585,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [1480, 1604.0]
+    coordinate: [1472, 1564.0]
     rotation: 180
     state: true
 - name: digital_pfb_clock_sync_xxx_0
@@ -575,7 +608,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [528, 1008.0]
+    coordinate: [584, 1096.0]
     rotation: 0
     state: enabled
 - name: import_0
@@ -826,9 +859,9 @@ blocks:
     label8: Signal 8
     label9: Signal 9
     legend: 'True'
-    marker1: '-1'
+    marker1: '0'
     marker10: '-1'
-    marker2: '-1'
+    marker2: '0'
     marker3: '-1'
     marker4: '-1'
     marker5: '-1'
@@ -837,10 +870,10 @@ blocks:
     marker8: '-1'
     marker9: '-1'
     name: '""'
-    nconnections: '1'
+    nconnections: '2'
     size: '1024'
     srate: samp_rate
-    stemplot: 'False'
+    stemplot: 'True'
     style1: '1'
     style10: '1'
     style2: '1'
@@ -1431,9 +1464,9 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [864, 372.0]
+    coordinate: [1240, 412.0]
     rotation: 0
-    state: enabled
+    state: disabled
 - name: uhd_usrp_sink_0_0_0_0
   id: uhd_usrp_sink
   parameters:
@@ -1708,7 +1741,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [864, 628.0]
+    coordinate: [1256, 612.0]
     rotation: 0
     state: enabled
 - name: uhd_usrp_source_0
@@ -1716,7 +1749,7 @@ blocks:
   parameters:
     affinity: ''
     alias: ''
-    ant0: '"TX/RX"'
+    ant0: '"RX2"'
     ant1: '"RX2"'
     ant10: '"RX2"'
     ant11: '"RX2"'
@@ -2144,15 +2177,18 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [112, 1000.0]
+    coordinate: [232, 1016.0]
     rotation: 0
     state: enabled
 
 connections:
 - [blocks_char_to_float_0, '0', qtgui_time_sink_x_0, '0']
+- [blocks_char_to_float_0_0, '0', qtgui_time_sink_x_0, '1']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_char_to_float_0, '0']
+- [blocks_unpack_k_bits_bb_0_0, '0', blocks_char_to_float_0_0, '0']
 - [blocks_vector_source_x_0_0, '0', digital_constellation_modulator_0, '0']
 - [blocks_vector_source_x_0_0_0, '0', digital_constellation_modulator_0_0, '0']
+- [blocks_vector_source_x_0_0_0_0, '0', blocks_unpack_k_bits_bb_0_0, '0']
 - [blocks_vector_source_x_0_0_0_0, '0', digital_constellation_modulator_0_0_0, '0']
 - [digital_constellation_modulator_0, '0', uhd_usrp_sink_0_0, '0']
 - [digital_constellation_modulator_0_0, '0', uhd_usrp_sink_0_0_0, '0']
