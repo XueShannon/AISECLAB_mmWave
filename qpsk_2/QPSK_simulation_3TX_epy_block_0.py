@@ -41,6 +41,8 @@ class blk(gr.sync_block):  # other base classes are basic_block, decim_block, in
                 case 1:
                     if x == 0:
                         self.count = self.count + 1
+                    else:
+                        self.count = 0
                     if self.count >= self.preamble*8:
                         self.step = 2
                         self.count = 0

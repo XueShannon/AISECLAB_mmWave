@@ -872,7 +872,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [952, 1084.0]
+    coordinate: [952, 1092.0]
     rotation: 0
     state: disabled
 - name: digital_map_bb_0
@@ -969,10 +969,11 @@ blocks:
       \ < 1:\n            return (len(input_items[0]))\n        for x in input_items[0]:\n\
       \            match self.step:\n                case 1:\n                   \
       \ if x == 0:\n                        self.count = self.count + 1\n        \
-      \            if self.count >= self.preamble*8:\n                        self.step\
-      \ = 2\n                        self.count = 0\n\n                case 2:   \
-      \                  \n                    if x != self.match[self.count]:\n \
-      \                       self.error = self.error + 1\n\n                    self.count\
+      \            else:\n                        self.count = 0\n               \
+      \     if self.count >= self.preamble*8:\n                        self.step =\
+      \ 2\n                        self.count = 0\n\n                case 2:     \
+      \                \n                    if x != self.match[self.count]:\n   \
+      \                     self.error = self.error + 1\n\n                    self.count\
       \ = self.count + 1\n                    \n                    if self.count\
       \ >= self.len:\n                        print(\"symbol error rate:\")\n    \
       \                    print(self.error/self.len*100)\n                      \
@@ -994,7 +995,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [2464, 1204.0]
+    coordinate: [1144, 1728.0]
     rotation: 0
     state: true
 - name: import_0
@@ -2974,6 +2975,7 @@ connections:
 - [blocks_throttle_0, '0', qtgui_time_sink_x_0_0, '0']
 - [blocks_throttle_1, '0', blocks_delay_0, '0']
 - [blocks_unpack_k_bits_bb_0, '0', blocks_char_to_float_0, '0']
+- [blocks_unpack_k_bits_bb_0, '0', epy_block_0, '0']
 - [blocks_unpack_k_bits_bb_0_0, '0', blocks_char_to_float_0_0, '0']
 - [blocks_unpack_k_bits_bb_0_0_0, '0', blocks_char_to_float_0_0_1, '0']
 - [blocks_vector_source_x_0_0, '0', digital_constellation_modulator_0, '0']
@@ -2983,7 +2985,6 @@ connections:
 - [digital_constellation_modulator_0_0, '0', uhd_usrp_sink_0_0_0, '0']
 - [digital_constellation_modulator_0_0_0, '0', uhd_usrp_sink_0_0_0_0, '0']
 - [digital_constellation_receiver_cb_0, '0', digital_diff_decoder_bb_0, '0']
-- [digital_constellation_receiver_cb_0, '0', epy_block_0, '0']
 - [digital_constellation_receiver_cb_0_0, '0', blocks_char_to_float_0_0_0, '0']
 - [digital_constellation_receiver_cb_0_0, '0', digital_diff_decoder_bb_0_0, '0']
 - [digital_constellation_receiver_cb_0_0_0, '0', digital_diff_decoder_bb_0_0_0, '0']
