@@ -24,7 +24,7 @@ Download link:https://tmytek.com/resources/software, the latest version is v3.9.
 # Hardware Setup
 Equipment connection see picture below\
 ![IMG_1723](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/00526ad6-aea5-48de-be89-144eed236af2)
-(1. USRP-2974 &emsp;2. )
+(1. USRP-2974 &emsp;2.UD Box &emsp;3.BBox Lite &emsp;4.BBox One &emsp;5. UD Box)
 # Software Setup
 ## LabVIEW
 ## TMXLAB Kit
