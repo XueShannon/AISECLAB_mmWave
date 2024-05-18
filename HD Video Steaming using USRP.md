@@ -52,7 +52,7 @@ The LTE Application Framework allows to transmit video streams if using a video 
 ![Data Streaming](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bd9fcd21-fb58-40e9-ab10-6f89b18602c7)\
 **Initializing Video Stream Transmitter**\
 1. Start cmd.exe and change the directory to the VLC installation directory.
-2. Start the VLC application as a streaming client with the following command:
+2. Start the VLC application as a streaming client with the following command:\
 vlc.exe --repeat “<PATH_TO_VIDEO_FILE>“\
 :sout=#std{access=udp{ttl=1},mux=ts,dst=169.254.10.85:50000}\
  where<PATH_TO_VIDEO_FILE> is replaced with the location of the video to be used. The IP address behind the dst should be the IP address of the USRP-2974.
