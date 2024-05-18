@@ -56,7 +56,7 @@ The LTE Application Framework allows to transmit video streams if using a video 
 vlc.exe --repeat “<PATH_TO_VIDEO_FILE>“\
 :sout=#std{access=udp{ttl=1},mux=ts,dst=169.254.10.85:50000}\
  where<PATH_TO_VIDEO_FILE> is replaced with the location of the video to be used. The IP address behind the dst should be the IP address of the USRP-2974.
-Port 50.000 is the default UDP Receive Port for USPR-297. For ease of use, this command line could be saved to a batch file, Stream Video LTE.bat.\
+Port 50.000 is the default UDP Receive Port for USPR-297. For ease of use, this command line could be saved to a batch file, Stream Video LTE.bat.
 
 **Initializing Video Stream Receiver**
 1. Change Transmit IP Address on the Advanced tab to the IP of the PC that you start the VLC application on. Here, it is chaned to 169.254.10.100
