@@ -7,4 +7,4 @@
 ## LTE Application Framework
 # Performe Video Streaming
 ## Needed Command
-## Optimization using Tmytek
+## Performance regarding BBox Lite and BBox One
