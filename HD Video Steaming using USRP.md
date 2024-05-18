@@ -69,3 +69,4 @@ The transmission process is farely steady even after the angle of the antenna fo
 ![data transfer](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bddeed8c-ce65-4237-8766-c1bdd06aa64c)\
 However, the data transmission is affected if having a metal plate placed in between BBox Lite and BBox one. Otherwise, the change of angle don't have significant affect on the data transmission process. Showing great achivement progress using these two equipments.\
 The following video would be a simple explanation of the whole process.\
+https://drive.google.com/file/d/1fSxlmNytF9zyNLeN3Ul6r4MeP4EW0Ywd/view?usp=sharing
