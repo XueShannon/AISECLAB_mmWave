@@ -51,16 +51,16 @@ After installe the antenna for BBox Lite and BBox One, the angle of the antenna 
 The LTE Application Framework allows to transmit video streams if using a video streaming application as data source and a video player as data sink. Here would be using the VLC media player, which is available at www.videolan.org.  The data streaming to/from the System Using UDP (Downlink-Only Operation Mode) works as below:\
 ![Data Streaming](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bd9fcd21-fb58-40e9-ab10-6f89b18602c7)
 **Initializing Video Stream Transmitter**\
-1. Start cmd.exe and change the directory to the VLC installation directory.\
+1. Start cmd.exe and change the directory to the VLC installation directory.
 2. Start the VLC application as a streaming client with the following command:\
 vlc.exe --repeat “<PATH_TO_VIDEO_FILE>“\
 :sout=#std{access=udp{ttl=1},mux=ts,dst=169.254.10.85:50000}\
  where<PATH_TO_VIDEO_FILE> is replaced with the location of the video to be used. The IP address behind the dst should be the IP address of the USRP-2974.
-Port 50.000 is the default UDP Receive Port for USPR-297. For ease of use, this command line could be saved to a batch file, Stream Video LTE.bat.
+Port 50.000 is the default UDP Receive Port for USPR-297. For ease of use, this command line could be saved to a batch file, Stream Video LTE.bat.\
 **Initializing Video Stream Receiver**
 1. Change Transmit IP Address on the Advanced tab to the IP of the PC that you start the VLC application on. Here, it is chaned to 169.254.10.100\
 2. Start cmd.exe and change the directory to the VLC installation directory.\
-3. Start the VLC application as a streaming client with the following command:\
+3. Start the VLC application as a streaming client with the following command:
 vlc.exe udp://@:60000\
 Port 60.000 is the default UDP Transmit Port for USRP-2974. For ease of use, this command line could be saved to a batch file, Play Video LTE.bat.\
 The Transmit and Receive Port number can be chaned in the advanced tab in the VI file.
