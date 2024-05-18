@@ -50,7 +50,7 @@ After installe the antenna for BBox Lite and BBox One, the angle of the antenna 
 ## Command
 The LTE Application Framework allows to transmit video streams if using a video streaming application as data source and a video player as data sink. Here would be using the VLC media player, which is available at www.videolan.org.  The data streaming to/from the System Using UDP (Downlink-Only Operation Mode) works as below:\
 ![Data Streaming](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bd9fcd21-fb58-40e9-ab10-6f89b18602c7)\
-**Initializing Video Stream Transmitter**\
+**Initializing Video Stream Transmitter**
 1. Start cmd.exe and change the directory to the VLC installation directory.
 2. Start the VLC application as a streaming client with the following command:\
 vlc.exe --repeat “<PATH_TO_VIDEO_FILE>“\
