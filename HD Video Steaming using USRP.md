@@ -67,3 +67,5 @@ The Transmit and Receive Port number can be chaned in the advanced tab in the VI
 ## Performance regarding BBox Lite and BBox One
 The transmission process is farely steady even after the angle of the antenna for both BBox Lite and BBox One is changed. Here is showing the user data transmission process even for the angel for both BBox equipment has been offset to the maximum angle.
 ![data transfer](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bddeed8c-ce65-4237-8766-c1bdd06aa64c)
+However, the data transmission is affected if having a metal plate placed in between BBox Lite and BBox one. Otherwise, the change of angle don't have significant affect on the data transmission process. Showing great achivement progress using these two equipments.\
+The following video would be a simple explanation of the whole process.\
