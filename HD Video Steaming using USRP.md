@@ -48,5 +48,6 @@ After installe the antenna for BBox Lite and BBox One, the angle of the antenna 
 ![BBox One](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/dc2aba3b-58aa-4414-9ed5-e9f11e54923e)
 # Performe Video Streaming
 ## Needed Command
-
+The LTE Application Framework allows to transmit video streams if using a video streaming application as data source and a video player as data sink. Here would be using the VLC media player, which is available at www.videolan.org.  The data streaming to/from the System Using UDP (Downlink-Only Operation Mode) works as below:\
+![Data Streaming](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/bd9fcd21-fb58-40e9-ab10-6f89b18602c7)
 ## Performance regarding BBox Lite and BBox One
