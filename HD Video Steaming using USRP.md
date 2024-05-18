@@ -38,6 +38,7 @@ The successful running VI file should look like this:\
 ![Success VI](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/44ec4b88-10c1-4243-a99c-66d2465295cb)
 (The output of the PDSCH constellation is not clean enough, due to the noise inside the lab. In the given example of the guide manual, the ideal SNR value should reach 30+)
 ## TMXLAB Kit
+After installe the antenna for BBox Lite and BBox One, the angle of the antenna for both device is able to adjust freely. To aligh the frequency value for UD Box and USRP-2974, the current value for both UD Box should be set to :**RF= 28000 MHz**&emsp;**IF= 2000MHz**&emsp;**LO= 30000 MHz**
 # Performe Video Streaming
 ## Needed Command
 ## Performance regarding BBox Lite and BBox One
