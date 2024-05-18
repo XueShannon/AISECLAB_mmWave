@@ -22,6 +22,9 @@ This is an add-on of LabVIEW NXG
 Download link:https://tmytek.com/resources/software, the latest version is v3.9.4, this is the software that controls the Tmytek equipments(UD Box, BBox Lite, BBox One)\
 *Setup see file TXMLAB KIT.md*
 # Hardware Setup
+Equipment connection see picture below\
+![IMG_1723](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/00526ad6-aea5-48de-be89-144eed236af2)
+
 # Software Setup
 ## LabVIEW
 ## TMXLAB Kit
