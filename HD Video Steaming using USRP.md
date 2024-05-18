@@ -38,7 +38,13 @@ The successful running VI file should look like this:\
 ![Success VI](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/44ec4b88-10c1-4243-a99c-66d2465295cb)
 (The output of the PDSCH constellation is not clean enough, due to the noise inside the lab. In the given example of the guide manual, the ideal SNR value should reach 30+)
 ## TMXLAB Kit
-After installe the antenna for BBox Lite and BBox One, the angle of the antenna for both device is able to adjust freely. To aligh the frequency value for UD Box and USRP-2974, the current value for both UD Box should be set to :**RF= 28000 MHz**&emsp;**IF= 2000MHz**&emsp;**LO= 30000 MHz**. Correspond to the setup, change the Mode for BBox Lite and BBox One. According to the hardware setup above, the output is connect to BBox One, thus the mode should be changed to **RX** while the BBox Lite should be in **TX**. The RF frequency of UD Box is correspond to different hardware, here, the central frequency for both BBox Lite and BBox One is set to 28 GHz, thus set the value for RF in UD Box.
+After installe the antenna for BBox Lite and BBox One, the angle of the antenna for both device is able to adjust freely. To aligh the frequency value for UD Box and USRP-2974, the current value for both UD Box should be set to :**RF= 28000 MHz**&emsp;**IF= 2000MHz**&emsp;**LO= 30000 MHz**. Correspond to the setup, change the Mode for BBox Lite and BBox One. According to the hardware setup above, the output is connect to BBox One, thus the mode should be changed to **RX** while the BBox Lite should be in **TX**. The RF frequency of UD Box is correspond to different hardware, here, the central frequency for both BBox Lite and BBox One is set to 28 GHz, thus set the value for RF in UD Box.\
+**Control Panel for UD Box**\
+![tmxlab](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/e9583796-6828-4e25-b0e2-9b12a67d32ab)
+**Control Panel for BBox Lite**\
+![BBox Lite](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/614e6c17-247a-4290-a359-47c818e27b14)
+**Control Panel for BBox One**\
+![BBox One](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/dc2aba3b-58aa-4414-9ed5-e9f11e54923e)
 # Performe Video Streaming
 ## Needed Command
 ## Performance regarding BBox Lite and BBox One
