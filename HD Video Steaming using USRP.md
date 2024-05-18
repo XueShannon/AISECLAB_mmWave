@@ -25,6 +25,7 @@ Download link:https://tmytek.com/resources/software, the latest version is v3.9.
 Equipment connection see picture below\
 ![IMG_1723](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/00526ad6-aea5-48de-be89-144eed236af2)
 (1. USRP-2974 &emsp;2.UD Box &emsp;3.BBox Lite &emsp;4.BBox One &emsp;5. UD Box)
+Output port of USRP-2974 should be **RF0/TX1**, this is connect to UD Box at it's **IF** port. For both UD Box, the **RF** port is connect to BBox Lite/BBox One using Cable N9927-60024. The input port of USRP-2974 that connect to the UD Box after the loop should be **RF1/RX2**.
 # Software Setup
 ## LabVIEW
 ## TMXLAB Kit
