@@ -60,7 +60,7 @@ Port 50.000 is the default UDP Receive Port for USPR-297. For ease of use, this 
 **Initializing Video Stream Receiver**
 1. Change Transmit IP Address on the Advanced tab to the IP of the PC that you start the VLC application on. Here, it is chaned to 169.254.10.100
 2. Start cmd.exe and change the directory to the VLC installation directory.
-3. Start the VLC application as a streaming client with the following command:
+3. Start the VLC application as a streaming client with the following command:\
 vlc.exe udp://@:60000\
 Port 60.000 is the default UDP Transmit Port for USRP-2974. For ease of use, this command line could be saved to a batch file, Play Video LTE.bat.\
 The Transmit and Receive Port number can be chaned in the advanced tab in the VI file.
