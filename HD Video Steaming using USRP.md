@@ -29,7 +29,7 @@ Output port of USRP-2974 should be **RF0/TX1**, this is connect to UD Box at it'
 # Software Setup
 ## LabVIEW
 Afer success connection between the PC host and USRP-294, the hardware is able to be added in LabVIEW using SystemDesigner in each project(USRP-2974 couldn't be added through MAX). IF not able to be directly match using hostname, click the "add hardware" in the menu and manually add the equipment using it's IP address.\
-Within that project, open the LabVIEW top-level host VI in the downlink-only variant, DL Host.gvi in DL Host.gcomp. **Change the designer view of the VI to DL RT Controller**\
+Within that project, open the LabVIEW top-level host VI in the downlink-only variant, DL Host.gvi in DL Host.gcomp. **Change the designer view of the VI to DL RT Controller**.\
 Click the Run button on the LabVIEW host VI. If successful, the FPGAReady indicator lights.\
 Set eNB TX Frequency and  UE RX Frequency to 2 GHz which would match the frequency later adjust by the UD Box.\
 Enable the eNB Transmitter, which implements a DL TX, by setting the switch control to On. If successful, the eNB TX Active indicator lights.\
@@ -38,7 +38,7 @@ The successful running VI file should look like this:\
 ![Success VI](https://github.com/XueShannon/AISECLAB_mmWave/assets/82636876/44ec4b88-10c1-4243-a99c-66d2465295cb)
 (The output of the PDSCH constellation is not clean enough, due to the noise inside the lab. In the given example of the guide manual, the ideal SNR value should reach 30+)
 ## TMXLAB Kit
-After installe the antenna for BBox Lite and BBox One, the angle of the antenna for both device is able to adjust freely. To aligh the frequency value for UD Box and USRP-2974, the current value for both UD Box should be set to :**RF= 28000 MHz**&emsp;**IF= 2000MHz**&emsp;**LO= 30000 MHz**. Correspond to the setup, change the Mode for BBox Lite and BBox One. According to the hardware setup above, the output is connect to BBox One, thus the mode should be changed to **RX** while the BBox Lite should be in **TX**
+After installe the antenna for BBox Lite and BBox One, the angle of the antenna for both device is able to adjust freely. To aligh the frequency value for UD Box and USRP-2974, the current value for both UD Box should be set to :**RF= 28000 MHz**&emsp;**IF= 2000MHz**&emsp;**LO= 30000 MHz**. Correspond to the setup, change the Mode for BBox Lite and BBox One. According to the hardware setup above, the output is connect to BBox One, thus the mode should be changed to **RX** while the BBox Lite should be in **TX**. The RF frequency of UD Box is correspond to different hardware, here, the central frequency for both BBox Lite and BBox One is set to 28 GHz, thus set the value for RF in UD Box.
 # Performe Video Streaming
 ## Needed Command
 ## Performance regarding BBox Lite and BBox One
