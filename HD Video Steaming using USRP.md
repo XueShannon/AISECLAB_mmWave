@@ -14,7 +14,7 @@ In order to download and install LabVIEW NXG it is necessary to first have NI Pa
 This option will first automatically install NI Package Manager, and will automatically select LabVIEW NXG to install.\
 **2.Download NI Package Manager and manually select LabVIEW NXG to be installed:**\
 Download NI Package Manager and select LabVIEW NXG\
-When adding the driver for USRP-2974, Labview NXG 4.0 only support driver NI-USRP 19.5, other version is not working
+*When adding the driver for USRP-2974, Labview NXG 4.0 only support driver NI-USRP 19.5, other version is not working\
 *USRP-2974 only support LabVIEW NXG version 4.0, USRP 2974 setup see USRP.md*
 ### LTE Application Frame
 Download link: https://www.ni.com/en/support/downloads/software-products/download.labview-communications-lte-application-framework.html#330619, the latest version is v19.5\
