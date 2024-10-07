@@ -53,7 +53,7 @@
   - Uses: Fine-grained human sensing, vital sensing.
 
 - **Point Cloud:**
-  - Collection of Reflection Points repreenting surface objects
+  - Collection of Reflection Points representing surface objects
 
   **Calculated by algo:**
   
