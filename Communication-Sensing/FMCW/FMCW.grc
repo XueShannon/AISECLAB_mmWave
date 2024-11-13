@@ -45,11 +45,32 @@ blocks:
     coordinate: [296, 12.0]
     rotation: 0
     state: enabled
+- name: range_val
+  id: variable_qtgui_range
+  parameters:
+    comment: ''
+    gui_hint: ''
+    label: ''
+    min_len: '200'
+    orient: QtCore.Qt.Horizontal
+    rangeType: float
+    start: '0'
+    step: '0.01'
+    stop: '1'
+    value: '0.5'
+    widget: counter_slider
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [456, 20.0]
+    rotation: 0
+    state: enabled
 - name: samp_rate
   id: variable
   parameters:
     comment: ''
-    value: 1e6
+    value: 200e6
   states:
     bus_sink: false
     bus_source: false
@@ -111,7 +132,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [696, 456.0]
+    coordinate: [432, 464.0]
     rotation: 0
     state: enabled
 - name: blocks_skiphead_0
@@ -129,11 +150,11 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [904, 468.0]
+    coordinate: [872, 476.0]
     rotation: 0
     state: enabled
-- name: blocks_vco_f_0
-  id: blocks_vco_f
+- name: blocks_vco_c_0
+  id: blocks_vco_c
   parameters:
     affinity: ''
     alias: ''
@@ -142,30 +163,12 @@ blocks:
     maxoutbuf: '0'
     minoutbuf: '0'
     samp_rate: samp_rate
-    sensitivity: 2*pi*samp_rate
+    sensitivity: 50E6
   states:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [336, 228.0]
-    rotation: 0
-    state: enabled
-- name: hilbert_fc_0
-  id: hilbert_fc
-  parameters:
-    affinity: ''
-    alias: ''
-    beta: '6.76'
-    comment: ''
-    maxoutbuf: '0'
-    minoutbuf: '0'
-    num_taps: '64'
-    win: window.WIN_HAMMING
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [616, 244.0]
+    coordinate: [560, 220.0]
     rotation: 0
     state: enabled
 - name: low_pass_filter_0
@@ -189,7 +192,7 @@ blocks:
     bus_sink: false
     bus_source: false
     bus_structure: null
-    coordinate: [424, 436.0]
+    coordinate: [648, 428.0]
     rotation: 0
     state: enabled
 - name: qtgui_freq_sink_x_0
@@ -300,6 +303,64 @@ blocks:
     bus_source: false
     bus_structure: null
     coordinate: [1128, 724.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_sink_x_1
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: '0'
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Received"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [392, 652.0]
+    rotation: 0
+    state: enabled
+- name: qtgui_sink_x_2
+  id: qtgui_sink_x
+  parameters:
+    affinity: ''
+    alias: ''
+    bw: samp_rate
+    comment: ''
+    fc: 2.8e9
+    fftsize: '1024'
+    gui_hint: ''
+    maxoutbuf: '0'
+    minoutbuf: '0'
+    name: '"Transmited Data"'
+    plotconst: 'True'
+    plotfreq: 'True'
+    plottime: 'True'
+    plotwaterfall: 'True'
+    rate: '10'
+    showports: 'False'
+    showrf: 'False'
+    type: complex
+    wintype: window.WIN_BLACKMAN_hARRIS
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1016, 316.0]
     rotation: 0
     state: enabled
 - name: qtgui_time_sink_x_0
@@ -436,7 +497,7 @@ blocks:
     ant7: '"TX/RX"'
     ant8: '"TX/RX"'
     ant9: '"TX/RX"'
-    bw0: 100e6
+    bw0: 200e6
     bw1: '0'
     bw10: '0'
     bw11: '0'
@@ -675,7 +736,7 @@ blocks:
     bus_structure: null
     coordinate: [1016, 188.0]
     rotation: 0
-    state: disabled
+    state: enabled
 - name: uhd_usrp_source_0
   id: uhd_usrp_source
   parameters:
@@ -713,7 +774,7 @@ blocks:
     ant7: '"RX2"'
     ant8: '"RX2"'
     ant9: '"RX2"'
-    bw0: 100e6
+    bw0: 200e6
     bw1: '0'
     bw10: '0'
     bw11: '0'
@@ -1111,48 +1172,21 @@ blocks:
     bus_structure: null
     coordinate: [64, 452.0]
     rotation: 0
-    state: disabled
-- name: virtual_sink_0
-  id: virtual_sink
-  parameters:
-    alias: ''
-    comment: ''
-    stream_id: USRP
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [1016, 316.0]
-    rotation: 0
-    state: enabled
-- name: virtual_source_0
-  id: virtual_source
-  parameters:
-    alias: ''
-    comment: ''
-    stream_id: USRP
-  states:
-    bus_sink: false
-    bus_source: false
-    bus_structure: null
-    coordinate: [64, 604.0]
-    rotation: 0
     state: enabled
 
 connections:
-- [analog_sig_source_x_0, '0', blocks_vco_f_0, '0']
-- [blocks_multiply_conjugate_cc_0, '0', blocks_skiphead_0, '0']
+- [analog_sig_source_x_0, '0', blocks_vco_c_0, '0']
+- [blocks_multiply_conjugate_cc_0, '0', low_pass_filter_0, '0']
 - [blocks_skiphead_0, '0', blocks_file_sink_0, '0']
 - [blocks_skiphead_0, '0', qtgui_freq_sink_x_0, '0']
 - [blocks_skiphead_0, '0', qtgui_sink_x_0, '0']
 - [blocks_skiphead_0, '0', qtgui_time_sink_x_0, '0']
-- [blocks_vco_f_0, '0', hilbert_fc_0, '0']
-- [hilbert_fc_0, '0', blocks_multiply_conjugate_cc_0, '0']
-- [hilbert_fc_0, '0', uhd_usrp_sink_0, '0']
-- [hilbert_fc_0, '0', virtual_sink_0, '0']
-- [low_pass_filter_0, '0', blocks_multiply_conjugate_cc_0, '1']
-- [uhd_usrp_source_0, '0', low_pass_filter_0, '0']
-- [virtual_source_0, '0', low_pass_filter_0, '0']
+- [blocks_vco_c_0, '0', blocks_multiply_conjugate_cc_0, '0']
+- [blocks_vco_c_0, '0', qtgui_sink_x_2, '0']
+- [blocks_vco_c_0, '0', uhd_usrp_sink_0, '0']
+- [low_pass_filter_0, '0', blocks_skiphead_0, '0']
+- [uhd_usrp_source_0, '0', blocks_multiply_conjugate_cc_0, '1']
+- [uhd_usrp_source_0, '0', qtgui_sink_x_1, '0']
 
 metadata:
   file_format: 1
