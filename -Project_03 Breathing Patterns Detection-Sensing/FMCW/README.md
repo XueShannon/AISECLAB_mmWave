@@ -50,13 +50,13 @@ Fig: Breathing Patterns as Captured by Respiration Rate.
 4. **Target Signal Extraction:**
    The signal component corresponding to the identified target is extracted across all chirps to obtain the slow-time signal. This extraction isolates the target's motion characteristics.
 
-   ![Range FFT](images\range_fft.png)
+   ![Range FFT](images/range_fft.png)
    
    Fig: Range FFT
 
 5. **FFT on Slow-time Signal:**
    A Fast Fourier Transform (FFT) is performed on the slow-time signal to determine the frequency peaks corresponding to the target’s motion. By analyzing the frequency peaks within the range of 0.1-0.5 Hz (6-30 bpm), the breathing frequency of the target is identified.
 
-    ![Eupnea Rates](images\eupnea_rates.png)
+    ![Eupnea Rates](images/eupnea_rates.png)
     
     Fig: Detected Breath Rates for Eupnea Pattern
