@@ -52,8 +52,9 @@ try:
             plt.pause(0.01)
         # time.sleep(0.05)
 except KeyboardInterrupt:
-    print("Force quit")
-    pass
+    print("\nForce quit")
+    exit()
+    
 finally:
     print("\n\n************************************************************\n\n")
     print(len(bpm))

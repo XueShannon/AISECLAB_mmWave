@@ -25,6 +25,15 @@
     - **Center Freq :** 2.8GHz (Converted to 28Ghz by UDbox)
     - **Bandwidth :** 100Mhz
 
+### Respiration Belt Data
+
+1. **Sample Rate:** 
+   20 Hz
+
+2. **Sensor Channel: Force Channel**; Measures chest displacement by detecting the force exerted during breathing.
+
+![Belt Data](images/belt_data.png)
+Fig: Breathing Patterns as Captured by Respiration Rate.
 
 
 ### Signal Processing
