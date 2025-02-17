@@ -32,7 +32,11 @@
     - Phase, doppler shift.
   - **Object Detection**:
     - Signal Variations in Intermediate Frequency channels.
-
+## Signal Processing ##
+- CFAR Detection
+- DBSCAN
+- Kalman Filters
+- Mathematical Methods: Geometric mean subtraction/Dual-differential background removal/Line fitting/
 ## Preprocessing ##
 
 - **Range-Angle Spectrum:**
