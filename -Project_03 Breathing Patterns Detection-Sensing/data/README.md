@@ -1,9 +1,12 @@
-
 ## Dataset Description
 
 - The Dechirped Beat signal is converted to a chirp matrix of shape (num. samps per chirp, num. of chirps) for generating range profiles.
 - Identifying the peak from the range profile the index is extracted across the matrix. This forms our slow-time signal.
 
+### Files
+
+- **slow_time_signals.csv :** Raw Slow time signals
+- **filtered_slow_time_signals.csv:** Band-passed signals
 
 <!-- Plots -->
 ### Raw Slow Time Signals
@@ -19,3 +22,12 @@ filtered at 0-0.55hz giving enough margin for our respiratory rate ranges from 3
 ### Filtered Slow Time Signal
 ![filtered-slow-signal](images/filtered_signal.png)
 
+
+
+## Results
+
+### CNN
+
+![cnn-result](images/cnn_results.png)
+
+![cnn-report](images/cnn_report.png)
