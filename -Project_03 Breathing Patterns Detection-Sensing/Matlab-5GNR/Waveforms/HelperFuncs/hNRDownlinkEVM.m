@@ -1,0 +1,1571 @@
+function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg)
+%hNRDownlinkEVM EVM calculation
+%   [EVMINFO,EQSYMBWP,REFSYMBWP] = hNRDownlinkEVM(WAVECONFIG,RXWAVEFORM,CFG)
+%   Calculates the error vector magnitude (EVM) of a received waveform. EVM
+%   is measured for physical data shared channel (PDSCH) and/or physical
+%   downlink control channel (PDCCH). If cfg.EVM3GPP is true, EVM
+%   measurement for PDSCH is done using the 3GPP specified EVM algorithm as
+%   defined in TS 38.104, Annex B(FR1) / Annex C(FR2). EVM for PDCCH is
+%   measured with cfg.EVM3GPP as false.
+%
+%   EVMINFO is a structure with fields:
+%   PDSCH              - numBWPs-by-1 struct array of EVM statistics
+%                        numBWPs is the number of configured bandwidth parts
+%   PDCCH              - numBWPs-by-1 struct array of EVM statistics
+%                        numBWPs is the number of configured bandwidth parts
+%   PERCFG             - Struct containing EVM statistics for
+%                        each PDSCH or PDCCH configuration
+%   PDSCH.DMRS         - EVM statistics for DM-RS associated with the PDSCHs
+%                        for each bandwidth part
+%   PDSCH.PTRS         - EVM statistics for PT-RS associated with the PDSCHs
+%                        for each bandwidth part
+%   PDCCH.DMRS         - EVM statistics for DM-RS associated with the PDCCHs
+%                        for each bandwidth part
+%   The bandwidth part specific EVM statistics have these fields :
+%      SubcarrierRMS   - RMS EVM per subcarrier
+%                        (Column vector of N subcarriers)
+%      SubcarrierPeak  - Peak EVM per subcarrier
+%                        (Column vector of N subcarriers)
+%      SymbolRMS       - RMS EVM per symbol
+%                        (Column vector of S symbols)
+%      SymbolPeak      - Peak EVM per symbol
+%                        (Column vector of S symbols)
+%      SlotRMS         - RMS EVM per slot
+%                        (Column vector of L slots)
+%      SlotPeak        - Peak EVM Per slot
+%                        (Column vector of L slots)
+%      EVMGrid         - Raw error vector for the selected window edge
+%                        (N subcarriers-by-S symbols)
+%      OverallEVM      - Structure containing EVM statistics for the
+%                        overall waveform. It contains these fields:
+%         EV           - Raw error vector for the overall waveform
+%                        (Array of q-by-n layers). q is the length of
+%                        the error vector concatenated for the active
+%                        slots in the waveform
+%         RMS          - RMS EVM for the overall waveform
+%                        (Scalar)
+%         Peak         - Peak EVM for the overall waveform
+%                        (Scalar)
+%      BandwidthPartID - Index of the bandwidth part
+%      AverageFO       - Estimated frequency estimate
+%      AmpImbalance    - Estimated amplitude imbalance (dB)
+%      PhImbalance     - Estimated phase imbalance (degrees)
+%
+%   PERCFG is a structure with fields:
+%   PDSCH              - n-by-1 struct array of PDSCH EVM statistics
+%                        n is the number of PDSCH configurations
+%   PDCCH              - m-by-1 struct array of PDCCH EVM statistics
+%                        m is the number of PDSCH configurations
+%   PDSCH.DMRS         - EVM statistics for DM-RS associated with the PDSCHs
+%                        for each configuration
+%   PDSCH.PTRS         - EVM statistics for PT-RS associated with the PDSCHs
+%                        for each configuration
+%   PDCCH.DMRS         - EVM statistics for DM-RS associated with the PDCCHs
+%                        for each configuration
+%   The configuration specific EVM statistics have these fields :
+%      SubcarrierRMS   - RMS EVM per subcarrier
+%                        (Column vector of N subcarriers)
+%      SubcarrierPeak  - Peak EVM per subcarrier
+%                        (Column vector of N subcarriers)
+%      SymbolRMS       - RMS EVM per symbol
+%                        (Column vector of S symbols)
+%      SymbolPeak      - Peak EVM per symbol
+%                        (Column vector of S symbols)
+%      SlotRMS         - RMS EVM per slot
+%                        (Column vector of L slots)
+%      SlotPeak        - Peak EVM Per slot
+%                        (Column vector of L slots)
+%      EVMGrid         - Raw error vector for the selected window edge
+%                        (N subcarriers-by-S symbols)
+%      OverallEVM      - Structure containing EVM statistics for the
+%                        overall waveform. It contains these fields:
+%         EV           - Raw error vector for this configuration.
+%                        (Array of q-by-n layers). q is the length of
+%                        the error vector concatenated for the active
+%                        slots in the waveform
+%         RMS          - RMS EVM for this configuration
+%                        (Scalar)
+%         Peak         - Peak EVM for this configuration
+%                        (Scalar)
+%      BandwidthPartID - Index of the bandwidth part
+%      RNTI            - RNTI for this configuration
+%      EQSYM           - Output cell array of IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the IQs concatenated for the active
+%                        slots in this configuration
+%                        concatenated for the active slots in this configuration
+%      REFSYM           - Output cell array of reference IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the IQs concatenated for the active
+%                        slots in this configuration
+%      DMRSEQSYM       - Output cell array of DM-RS IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the DM-RS IQs
+%                        concatenated for the active slots in this configuration
+%      DMRSREFSYM      - Output cell array of reference DM-RS IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the DM-RS reference IQs concatenated
+%                        for the active slots in this configuration
+%      PTRSEQSYM       - Output cell array of PT-RS IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the PT-RS IQs concatenated for the
+%                        active slots in this configuration. This is
+%                        applicable only for PDSCH.
+%      PTRSREFSYM      - Output cell array of reference PT-RS IQ constellations.
+%                        (e-by-1) e is 1 when cfg.Evm3GPP is false and 2
+%                        otherwise. Each cell array element contains an
+%                        array of q-by-n layers IQ constellations. q is a
+%                        vector of all the PT-RS reference IQs concatenated
+%                        for the active slots in this configuration. This
+%                        is applicable only for PDSCH.
+%      NAME            - Name of the configuration
+%      ID              - Unique identifier number of the configuration
+%      PowerPerRE      - Column vector of average power per resource
+%                        element (RE), with values in dBm relative to 1
+%                        milliwatt in 1 Ohm. Each row corresponds to a
+%                        receive antenna.
+%
+%   EQSYMBWP           - Output cell array of IQ constellations.
+%                        (e-by-numBWPs) e is 1 when cfg.Evm3GPP is
+%                        false and 2 otherwise. Each cell array element
+%                        contains an array of q-by-n layers IQ
+%                        constellations. q is a vector of all the IQs
+%                        concatenated for the active slots in the waveform
+%                        
+%   REFSYMBWP          - Output cell array of reference IQ constellations.
+%                        (e-by-numBWPs) e is 1 when cfg.Evm3GPP is
+%                        false and 2 otherwise. Each cell array element
+%                        contains an array of q-by-n layers IQ
+%                        constellations. q is the vector of all the IQs
+%                        concatenated for the active slots in the waveform
+%   WAVECONFIG         - Input object of type 'nrDLCarrierConfig'
+%
+%   RXWAVEFORM         - Time domain baseband IQ samples input. Timing of
+%                        the waveform is assumed to be slot-wise aligned
+%                        with sample level fine-tuning performed
+%                        subsequently. The length of the waveform can be an
+%                        arbitrary number of slots
+%
+%   CFG is a input structure with the fields:
+%   Evm3GPP            - Enables or disables 3GPP method of EVM computation
+%                        (Default value: false)
+%   TargetRNTIs        - Contains the list of target RNTIs to decode. If
+%                        not specified, the list is autogenerated as
+%                        specified in the standard
+%                        (Default value: empty)
+%   PlotEVM            - Enables or disables plotting of EVM (per slot, per
+%                        symbol, per subcarrier and overall EVM)
+%                        (Default value: true)
+%   DisplayEVM         - Enables or disables the display of
+%                        EVM statistics on the command window 
+%                        (Default value: true)
+%   InitialNSlot       - Starting slot of the input waveform
+%                        (Default value: 0)
+%   SampleRate         - Waveform sample rate. If absent, the default
+%                        waveform sample rate specified in WAVECONFIG is
+%                        used for demodulation. It is specified as either a
+%                        positive scalar or [].
+%   PdschEnable        - Enables or disables EVM measurement of PDSCH
+%                        configurations
+%                        (Default value: true)
+%   PdcchEnable        - Enables or disables EVM measurement of PDCCH
+%                        configurations
+%                        (Default value: true)
+%   CorrectCoarseFO    - Enables or disables coarse frequency offset (FO)
+%                        estimation and correction. If enabled, the
+%                        waveform start slot should match InitialNSlot.
+%                        (Default value: false)
+%   CorrectFineFO      - Enables or disables fine FO estimation and
+%                        correction
+%                        (Default value: false)
+%   TimeSyncEnable     - Enables or disables timing estimation
+%                        (Default value: true)
+%   UseWholeGrid       - Enables or disables the use of a reference grid,
+%                        consisting of known data and demodulation
+%                        reference signals (DM-RS) IQ samples for timing
+%                        estimation purposes. Enable 'UseWholeGrid' when
+%                        there are only few DM-RS symbols in the received
+%                        waveform or when the timing synchronization is
+%                        done over a short part of the frame, for example,
+%                        just a slot
+%                        (Default value: false)
+%   IQImbalance        - Enables or disables I/Q imbalance estimation and
+%                        correction
+%                        (Default value: false)
+%   ExcludeDC          - Enables or disables DC subcarrier from EVM
+%                        processing
+%                        (Default value: false)
+%   DCOffset           - Enables or disables DC offset estimation and
+%                        correction
+%                        (Default value: false)
+
+% Copyright 2019-2024 The MathWorks, Inc.
+
+    narginchk(3,3);
+
+    % Validate inputs
+    validateInputs(waveConfig,cfg);
+
+    if ~isfield(cfg,'Evm3GPP')
+        evm3GPP = false;
+    else
+        evm3GPP = cfg.Evm3GPP;
+    end
+    if ~isfield(cfg,'TargetRNTIs')
+        targetRNTIs = [];
+    else
+        targetRNTIs = cfg.TargetRNTIs;
+    end
+    if ~isfield(cfg,'PlotEVM')
+        plotEVM = true;
+    else
+        plotEVM = cfg.PlotEVM;
+    end
+    if ~isfield(cfg,'DisplayEVM')
+        displayEVM = true;
+    else
+        displayEVM = cfg.DisplayEVM;
+    end
+    if ~isfield(cfg,'InitialNSlot')
+        initialNSlot = 0;
+    else
+        initialNSlot = cfg.InitialNSlot;
+    end
+    if ~isfield(cfg,'PdschEnable')
+        pdschEnable = true;
+    else
+        pdschEnable = cfg.PdschEnable;
+    end
+    if ~isfield(cfg,'PdcchEnable')
+        pdcchEnable = true;
+    else
+        pdcchEnable = cfg.PdcchEnable;
+    end
+    if ~isfield(cfg,'CorrectCoarseFO')
+        correctCoarseFO = false;
+    else
+        correctCoarseFO = cfg.CorrectCoarseFO;
+    end
+    if ~isfield(cfg,'CorrectFineFO')
+        correctFineFO = false;
+    else
+        correctFineFO = cfg.CorrectFineFO;
+    end
+    if ~isfield(cfg,'TimeSyncEnable')
+        timeSyncEnable = true;
+    else
+        timeSyncEnable = cfg.TimeSyncEnable;
+    end
+    if ~isfield(cfg,'UseWholeGrid')
+        useWholeGrid = false;
+    else
+        useWholeGrid = cfg.UseWholeGrid;
+    end
+    if ~isfield(cfg,'IQImbalance')
+        iqImbalance = false;
+    else
+        iqImbalance = cfg.IQImbalance;
+    end
+    if ~isfield(cfg,'DCOffset')
+        dcOffsetFlag = false;
+    else
+        dcOffsetFlag = cfg.DCOffset;
+    end
+
+    % Derive per-slot resources (waveformResources) used as reference for EVM calculation
+    [~,winfo] = nrWaveformGenerator(waveConfig);
+    waveformResources = winfo.WaveformResources;
+
+    numBWPs = length(waveConfig.BandwidthParts);
+    eqSymBwp = cell(1+evm3GPP,numBWPs);                 % Equalized symbols for constellation plot, for each low/high EVM window location and BWP
+    refSymBwp = cell(1+evm3GPP,numBWPs);                % Reference symbols for constellation plot, for each low/high EVM window location and BWP
+    dmrsEqSymBwp = cell(1+evm3GPP,numBWPs);             % PDSCH DM-RS equalized symbols, for each low/high EVM window location and BWP
+    dmrsRefSymBwp = cell(1+evm3GPP,numBWPs);            % PDSCH DM-RS reference symbols, for each low/high EVM window location and BWP
+    ptrsEqSymBwp = cell(1+evm3GPP,numBWPs);             % PDSCH PT-RS equalized symbols, for each low/high EVM window location and BWP
+    ptrsRefSymBwp = cell(1+evm3GPP,numBWPs);            % PDSCH PR-RS reference symbols, for each low/high EVM window location and BWP
+
+    pdcchEqSymBwp = cell(1,numBWPs);                    % PDCCH equalized symbols for each BWP
+    pdcchRefSymBwp = cell(1,numBWPs);                   % PDCCH reference symbols for each BWP
+    pdcchDmrsEqSymBWP = cell(1,numBWPs);                % PDCCH DM-RS equalized symbols for each BWP
+    pdcchDmrsRefSymBWP = cell(1,numBWPs);               % PDCCH DM-RS reference symbols for each BWP
+
+    evmInfo = [];                                       % EVM statistics
+
+    % Obtain length of PDSCH and PDCCH configurations
+    pdschDefs = [waveConfig.PDSCH{:}];
+    pdcchDefs = [waveConfig.PDCCH{:}];
+
+    unitOverallEVMStruct = struct('EV',[],'RMS',[],'Peak',[]);
+    unitEvmStruct = struct('SubcarrierRMS',[],'SubcarrierPeak',[],'SymbolRMS',[],'SymbolPeak',[],...
+        'SlotRMS',[],'SlotPeak',[],'EVMGrid',[],'OverallEVM',unitOverallEVMStruct,'PowerPerRE',-Inf);
+
+    % PDSCH EVM statistics for each valid configuration present in waveConfig
+    pdschEVMCfg = struct('SubcarrierRMS',[],'SubcarrierPeak',[],'SymbolRMS',[],'SymbolPeak',[],...
+        'SlotRMS',[],'SlotPeak',[],'EVMGrid',[],'OverallEVM',unitOverallEVMStruct,'DMRS',unitEvmStruct,...
+        'PTRS',unitEvmStruct,'BandwidthPartID',[],'RNTI',[],'EqSym',[],'RefSym',[],...
+        'DmrsEqSym',[],'DmrsRefSym',[],'PtrsEqSym',[],'PtrsRefSym',[],'Name',[],'ID',[],'PowerPerRE',-Inf);
+    pdschEVMCfg = repmat(pdschEVMCfg,1,length(pdschDefs));
+
+    % PDCCH EVM statistics for each valid configuration present in waveConfig
+    pdcchEVMCfg = struct('SubcarrierRMS',[],'SubcarrierPeak',[],'SymbolRMS',[],'SymbolPeak',[],...
+        'SlotRMS',[],'SlotPeak',[],'EVMGrid',[],'OverallEVM',unitOverallEVMStruct,'DMRS',unitEvmStruct,...
+        'BandwidthPartID',[],'RNTI',[],'EqSym',[],'RefSym',[],'DmrsEqSym',[],'DmrsRefSym',[],'Name',[],'ID',[],'PowerPerRE',-Inf);
+    pdcchEVMCfg = repmat(pdcchEVMCfg,1,length(pdcchDefs));
+
+    % Store the received waveform for reuse in each BWP
+    % Loop over each BWP
+    rxWaveformOrig = rxWaveform;
+    for bwpIdx = 1:numBWPs
+
+        % Reset 'excludeDC' for each BWP
+        if ~isfield(cfg,'ExcludeDC')
+            excludeDC = false;
+        else
+            excludeDC = cfg.ExcludeDC;
+        end
+
+        % Display error messages for the below checks for pdschArray. At
+        % least one non-empty resource field should be present pdschArray
+        % should have at least one non-empty DM-RS resources At least one
+        % PDSCH Configuration should be enabled
+        resourceEmptyCount = 0;
+        dmrsEmptyCount = 0;
+        pdschDisabledCount = 0;
+
+        % Check validity of each BWP configuration
+        invalidBWPConfigFlag = false;
+
+        bwpCfg = waveConfig.BandwidthParts{bwpIdx};
+        [pdschArray,~,carrier] = hListTargetPDSCHs(waveConfig,waveformResources,targetRNTIs,bwpIdx);
+        
+        % Extract PDCCH resources in this BWP
+        pdcchWaveCfg = [];
+        pdcchDefs = [waveConfig.PDCCH{:}];
+        pdcchCfgLen = length(pdcchDefs);
+        for n = 1:pdcchCfgLen
+            if any(pdcchDefs(n).BandwidthPartID == waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID)
+                ri = waveformResources.PDCCH(n);
+                ri.PDCCH = pdcchDefs(n);
+                ri.ID = n;
+                pdcchWaveCfg = [pdcchWaveCfg ri];
+            end
+        end
+
+        % Skip PDCCH processing for empty or disabled PDCCH configurations
+        if isempty(pdcchWaveCfg) || isempty(find([pdcchDefs(:).Enable],1)) || ~pdcchEnable
+            pdcchCfgLen = 0;
+        end
+
+        pdschCfgLen = length(pdschArray);
+
+        % Knobs used to disable pdsch processing
+        if ~pdschEnable
+            pdschCfgLen = 0;
+        end
+
+        if isempty(pdschArray)
+            invalidBWPConfigFlag = true;
+        end
+
+        % Check each PDSCH configuration for valid configurations
+        for idx = 1:pdschCfgLen
+            if pdschArray(idx).PDSCH.NumLayers > 4
+                error('More than 1 codewords not supported.')
+            end
+            if isempty(pdschArray(idx).Resources) || isempty(pdschArray(idx).PDSCH.PRBSet) || ...
+                isempty(pdschArray(idx).PDSCH.SymbolAllocation) || pdschArray(idx).PDSCH.SymbolAllocation(2) == 0
+                resourceEmptyCount = resourceEmptyCount + 1;
+            end
+            nonEmptyCount = 0;
+            for rIdx = 1:length(pdschArray(idx).Resources)
+                if ~isempty(pdschArray(idx).Resources(rIdx).DMRSSymbols)
+                    nonEmptyCount = nonEmptyCount + 1;
+                end
+            end
+            if nonEmptyCount == 0
+                dmrsEmptyCount = dmrsEmptyCount + 1;
+            end
+            if ~pdschArray(idx).PDSCH.Enable
+                pdschDisabledCount = pdschDisabledCount + 1;
+            end
+        end
+        if resourceEmptyCount == pdschCfgLen && pdschEnable && ~isempty(pdschArray)
+            warning('Input configuration does not contain adequate resources to proceed with EVM measurement');
+            invalidBWPConfigFlag = true;
+        end
+        if dmrsEmptyCount == pdschCfgLen && pdschEnable && ~isempty(pdschArray)
+            warning('Input configuration does not contain DM-RS resources to proceed with EVM measurement');
+            invalidBWPConfigFlag = true;
+        end
+        if pdschDisabledCount == pdschCfgLen && pdschEnable && ~isempty(pdschArray)
+            warning('Input configuration does not contain valid PDSCH resources to proceed with EVM measurement');
+            invalidBWPConfigFlag = true;
+        end
+
+        % Skip processing this BWP due to unexpected configuration
+        if invalidBWPConfigFlag
+            pdschCfgLen = 0;
+            pdcchCfgLen = 0;
+            pdschArray = [];
+        end
+
+        % Obtain OFDM related info
+        ofdmInfo = nrOFDMInfo(carrier);
+        totalConfiguredSlots = waveConfig.NumSubframes*ofdmInfo.SlotsPerSubframe;
+        initialNSlot = mod(initialNSlot,totalConfiguredSlots);
+        carrier.NSlot = initialNSlot;
+        L = ofdmInfo.SymbolsPerSlot;
+        sampleRate = winfo.ResourceGrids(bwpIdx).Info.SampleRate;
+        if ~isfield(cfg,'SampleRate') || isempty(cfg.SampleRate)
+            rxWaveform = rxWaveformOrig;
+        else
+            rxWaveform = resample(rxWaveformOrig,sampleRate,cfg.SampleRate);
+        end
+        k0 = winfo.ResourceGrids(bwpIdx).Info.k0;
+        scs = carrier.SubcarrierSpacing;
+        ofdmInfo.SamplesPerSubframe = sampleRate/1000;
+
+        % Proceed only for valid configuration
+        if ~invalidBWPConfigFlag
+
+            % When all number of layers are not the same across PDSCH
+            % configurations, select the PDSCH configurations with the
+            % highest number of layers.
+            temp = [pdschArray(:).PDSCH];
+            unEqualNumLayersFlag = ~(all(temp(1).NumLayers == [temp.NumLayers]));
+            maxLayers = max([temp.NumLayers]);
+
+            % Ensure there is at least 1 valid RNTI for this BWP
+            rntiNotFoundFlag = true;
+            pdschDefs = [waveConfig.PDSCH{:}];
+            for n = 1:length(pdschDefs)
+                if any(pdschDefs(n).RNTI == targetRNTIs(:)) && pdschDefs(n).BandwidthPartID == waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID
+                    rntiNotFoundFlag = false;
+                    break;
+                end
+            end
+            if rntiNotFoundFlag && ~isempty(targetRNTIs)
+                continue;
+            end
+
+            % Form 'refGrid' used for various impairment estimation and
+            % compensation. Create a reference grid with 'maxLayers'.
+            % Combine it with reference grids for each configuration.
+            nSubcarriers = carrier.NSizeGrid * 12;
+            nSymbols = carrier.SymbolsPerSlot*ofdmInfo.SlotsPerFrame*2;
+            refGrid = zeros(nSubcarriers,nSymbols,maxLayers);
+            for n = 1:length(pdschArray)
+                tmpRefGrid = hReferenceGrid(carrier,bwpCfg,pdschArray(n),ofdmInfo.SlotsPerFrame*2,'PDSCH');
+                l = size(tmpRefGrid,3);
+                refGrid(:,:,1:l) = refGrid(:,:,1:l)+ tmpRefGrid;
+            end
+
+            % Shift frequency of the waveform, taking into account the 'k0' for the current BWP
+            t = (0:size(rxWaveform,1)-1).'/sampleRate;
+            k0Offset = k0*scs*1e3;
+            rxWaveformk0Shifted = rxWaveform.*exp(-1i*2*pi*k0Offset*t);
+
+            % Estimate the coarse and integer FO
+            % Correct the received waveform with these estimates
+            foffsetEstCoarse = 0;
+            integerCfoHz = 0;
+            if correctCoarseFO && pdschCfgLen
+                foffsetEstCoarse = hNRFrequencyOffset('coarseFO',carrier,rxWaveformk0Shifted,sampleRate);
+                rxWaveformk0Shifted = hNRFrequencyOffset('FOCorrect',rxWaveformk0Shifted,sampleRate,foffsetEstCoarse);
+                integerCfoHz = hNRFrequencyOffset('integerFO',carrier,rxWaveformk0Shifted,refGrid,sampleRate,waveConfig.CarrierFrequency+k0Offset);
+                rxWaveformk0Shifted = hNRFrequencyOffset('FOCorrect',rxWaveformk0Shifted,sampleRate,integerCfoHz);
+            end
+
+            % Estimate and correct the I/Q imbalance for the received waveform
+            ampImbEst = 0;
+            phImbEst = 0;
+            if iqImbalance
+
+                dcOffset1 = 0;
+                if dcOffsetFlag
+                    % Remove large DC offset before estimation of IQ imbalance
+                    dcOffset1 = mean(rxWaveformk0Shifted,'all');
+                end
+                rxWaveformk0Shifted = rxWaveformk0Shifted-dcOffset1;
+                [rxWaveformk0Shifted,ampImbEst,phImbEst] = hNRIQImbalance(rxWaveformk0Shifted);
+
+                % Add the estimated DC Offset back to the waveform
+                rxWaveformk0Shifted = rxWaveformk0Shifted+dcOffset1;
+            end
+
+            % Time synchronization of input waveform
+            offset = 0;
+            if timeSyncEnable
+
+                % Ensure large DC offsets are removed before calling
+                % nrTimingEstimate
+                dcOffset1 = 0;
+
+                if dcOffsetFlag
+                    dcOffset1 = mean(rxWaveformk0Shifted,'all');
+                end
+
+                % If enabled, use a grid of known data and DM-RS IQ samples for
+                % timing estimation
+                if useWholeGrid
+                    refGrid = winfo.ResourceGrids(bwpIdx).ResourceGridInCarrier;
+                    refGrid(:,1:ofdmInfo.SymbolsPerSlot*carrier.NSlot,:) = [];
+                end
+                if ~isempty(refGrid)
+                    offset = nrTimingEstimate(carrier,rxWaveformk0Shifted-dcOffset1,refGrid,...
+                        'SampleRate',sampleRate,'CarrierFrequency',waveConfig.CarrierFrequency+k0Offset);
+                end
+            end
+            rxWaveform = rxWaveformk0Shifted(1+offset:end,:);
+
+            % Get OFDM information for the given sample rate
+            opts.cyclicPrefix = carrier.CyclicPrefix;
+            opts.SampleRate = sampleRate;
+            opts.NFFT = [];
+            opts.CarrierFrequency = waveConfig.CarrierFrequency;
+            info = nr5g.internal.OFDMInfo(carrier,opts);
+
+            % Obtain the length of the first symbol
+            temp = [winfo.ResourceGrids(:)];
+            bIdx = find([temp.BandwidthPartID] == waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID);
+            firstSymbLen = winfo.ResourceGrids(bIdx).Info.SymbolLengths(1);
+            r = info.Resampling;
+            if (any([r.L r.M]~=1))
+                firstSymbLen = ceil(firstSymbLen * r.L / r.M);
+            end
+            T = size(rxWaveform,1);
+            if T < firstSymbLen
+                %Skip this Bandwidth part if the input waveform is less than a
+                %symbol long
+                continue;
+            end
+
+            gridSize = size(nrOFDMDemodulate(carrier,rxWaveform,'SampleRate',sampleRate));
+            nSlots = floor(gridSize(2)/L);
+            nFrames = floor(nSlots/(10*ofdmInfo.SlotsPerSubframe));
+            frameEVM = repmat(hRawEVM([]), 1, max(nFrames,1));                                   % Per-frame EVM
+
+            % Create a reference grid for 'nslots' with all configurations
+            % combined into 'refGrid' if needed.
+            if unEqualNumLayersFlag
+                refGrid = zeros(nSubcarriers,nSlots*carrier.SymbolsPerSlot,maxLayers);
+                for n = 1:length(pdschArray)
+                    tmpRefGrid = hReferenceGrid(carrier,bwpCfg,pdschArray(n),nSlots,'PDSCH');
+                    l = size(tmpRefGrid,3);
+                    refGrid(:,:,1:l) = refGrid(:,:,1:l)+ tmpRefGrid;
+                end
+            else
+                refGrid = hReferenceGrid(carrier,bwpCfg,pdschArray,nSlots,'PDSCH');
+            end
+            
+            % Adjust 'refGrid' according to the BWP dimensions
+            if ~isempty(refGrid)
+                bwpStart = bwpCfg.NStartBWP-carrier.NStartGrid;
+                refGrid = refGrid(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+            end
+
+            if dcOffsetFlag && ~isempty(pdschArray)
+                % Locate the first valid PDSCH and use it for DM-RS location
+                % selection
+                for pIdx = 1:length(pdschArray)
+                    if ~isempty(pdschArray(pIdx).Resources(1).DMRSSymbolSet)
+                        loc = pIdx;
+                        break;
+                    end
+                end
+                firstDmrsLocInSlot = pdschArray(loc).Resources(1).DMRSSymbolSet(1)+1;
+                [~,cdmLengths] = extractPdschCfg(pdschArray);
+
+                % Force a coarse FO estimation and correction when only fine
+                % FO estimation is enabled.
+                if ~correctCoarseFO && correctFineFO
+                    foffsetEstCoarse = hNRFrequencyOffset('coarseFO',carrier,rxWaveform,sampleRate);
+                    rxWaveform = hNRFrequencyOffset('FOCorrect',rxWaveform,sampleRate,foffsetEstCoarse);
+                end
+                dcOffset = hNRDCOffset(carrier,waveConfig,rxWaveform,refGrid,...
+                    cdmLengths,firstDmrsLocInSlot,sampleRate,bwpIdx);
+                rxWaveform = rxWaveform-dcOffset;
+            end
+
+            % Calculate the FFT sampling instants based the presence of
+            % '3GPPEVM' knob
+            if evm3GPP
+                W = getEVMWindow(carrier,waveConfig.FrequencyRange,waveConfig.ChannelBandwidth,ofdmInfo.Nfft);
+                nEVMWindowLocations = 2;
+
+                if (mod(W,2)==0)
+                    alpha = 1;
+                else
+                    alpha = 0;
+                end
+
+                % Restrict CP length as per TS 38.104, Annex B.5.1 (FR1) / Annex C.5.1 (FR2)
+                cpLength = double(ofdmInfo.CyclicPrefixLengths(2));
+
+                % Estimate deltaC centered on the CP
+                deltaC = ceil(cpLength/2);
+                cpFraction = [(deltaC + alpha - floor(W/2))/cpLength; (deltaC + floor(W/2))/cpLength];
+            else
+                nEVMWindowLocations = 1;
+                cpFraction = 0.5;      % Use default value
+            end
+
+            % Initialize 'carrier' with the correct NSlot
+            carrier.NSlot = initialNSlot;
+
+            % Slot allocation of the PDSCH configurations may overlap with
+            % each other. Extract unique allocated slots
+            pdschArrayTmp = hListTargetPDSCHs(waveConfig,waveformResources,targetRNTIs,bwpIdx);
+            activeSlots = [];
+            for pIdx = 1:length(pdschArray)
+                if ~isempty(pdschArrayTmp(pIdx).Resources)
+                    activeSlots = [activeSlots pdschArrayTmp(pIdx).Resources.NSlot]; %#ok<*AGROW>
+                end
+            end
+            if ~isempty(activeSlots)
+                activeSlots = unique(activeSlots);
+            end
+
+            [~,cdmLengths] = extractPdschCfg(pdschArray);
+            % When correctFineFO is enabled, estimate FO for each valid slot
+            % and store the averaged result in averageFO
+            averageFO = foffsetEstCoarse+integerCfoHz;
+            if correctFineFO && pdschEnable && pdschCfgLen
+                [rxWaveform,averageFineFO] = hNRFrequencyOffset('fineFO',carrier,bwpCfg,rxWaveform,refGrid,[],...
+                    cdmLengths,sampleRate,activeSlots,waveConfig.CarrierFrequency+k0Offset);
+                averageFO = averageFO + averageFineFO;
+            end
+            rxGridLow = nrOFDMDemodulate(carrier, rxWaveform, 'CyclicPrefixFraction',cpFraction(1),'SampleRate',sampleRate,...
+                'CarrierFrequency',waveConfig.CarrierFrequency + k0Offset);
+            if nEVMWindowLocations == 2
+                rxGridHigh = nrOFDMDemodulate(carrier, rxWaveform, 'CyclicPrefixFraction',cpFraction(2),'SampleRate',sampleRate,...
+                    'CarrierFrequency',waveConfig.CarrierFrequency + k0Offset);
+            end
+
+            % Work only on the relevant BWP in the waveform to simplify indexing
+            bwpStart = bwpCfg.NStartBWP-carrier.NStartGrid;
+            rxGridLow = rxGridLow(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+            if evm3GPP
+                rxGridHigh = rxGridHigh(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+            end
+
+            waveformPeriod = inf;
+
+            if isempty(targetRNTIs)
+                [pdschArray,~,~] = hListTargetPDSCHs(waveConfig,waveformResources,targetRNTIs,bwpIdx);
+                temp = [pdschArray.PDSCH];
+                targetRNTIsTmp = unique([temp.RNTI]);
+            else
+                targetRNTIsTmp = targetRNTIs;
+                [pdschArray,~,~] = hListTargetPDSCHs(waveConfig,waveformResources,targetRNTIs,bwpIdx);
+            end
+
+            % Initialize per-BWP, channel specific equalized (and
+            % reference) grids. These are used for the BWP specific EVM
+            % calculation
+            perBWPEq = 0;
+            perBWPRef = 0;
+            perBWPDMRSEq = 0;
+            perBWPDMRSRef = 0;
+            perBWPPTRSEq = 0;
+            perBWPPTRSRef = 0;
+            perBWPPdcchEq = 0;
+            perBWPPdcchRef = 0;
+            bwpInitCount = 0;
+            invalidCfgCount = 0;
+
+            % Loop over each PDSCH configuration
+            for currentIdx = 1:length(pdschDefs)
+
+                % currentCfg holds the current PDSCH configuration
+                currentCfg = [];
+
+                % Ensure configurations only for current BWP are processed
+                if pdschDefs(currentIdx).BandwidthPartID == waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID
+                    ri = waveformResources.PDSCH(currentIdx);
+                    ri.PDSCH = pdschDefs(currentIdx);
+                    ri.ID = currentIdx;
+                    currentCfg = [currentCfg ri];
+                end
+
+                % Skip this configuration if not valid
+                if isempty(currentCfg) || isempty([currentCfg.Resources.NSlot])
+                    if ~isempty(currentCfg)
+                        pdschEVMCfg(currentIdx).Name = currentCfg.Name;
+                    end
+                    invalidCfgCount = invalidCfgCount+1;
+                    continue
+                end
+                t = [currentCfg.Resources];
+                activeSlots = [t.NSlot];
+
+                % Build 'refGrid' for this configuration
+                refGrid = hReferenceGrid(carrier,bwpCfg,currentCfg,nSlots,'PDSCH',waveformPeriod);
+                bwpStart = bwpCfg.NStartBWP-carrier.NStartGrid;
+                if ~isempty(refGrid)
+                    refGrid = refGrid(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+                end
+
+                % When the input waveform has more slots than
+                % waveConfig.NumSubframes, regenerate pdsch, pdcch reference
+                % resources and carrier with the correct number of slots
+                % waveformPeriod takes into account the number of slots as
+                % configured by waveConfig.NumSubframes. It is used to detect
+                % waveform repetition and regenerate the waveform configuration
+                % resources.
+                waveformPeriod = inf;
+                if nSlots > waveConfig.NumSubframes*ofdmInfo.SlotsPerSubframe && ~invalidBWPConfigFlag
+
+                    waveformPeriod = waveConfig.NumSubframes*ofdmInfo.SlotsPerSubframe;
+                    waveformResources = winfo.WaveformResources;
+
+                    % Regenerate pdsch and pdcch configuration resources taking
+                    % into account number of waveform repetitions and period
+                    waveformResources = waveformResourcesRepeat(waveformResources,waveformPeriod,nSlots+initialNSlot);
+
+                    waveConfigRep = waveConfig;
+                    waveformResourcesRep = waveformResources;
+                    waveformResourcesRep.PDSCH(1) = waveformResourcesRep.PDSCH(currentIdx);
+                    waveConfigRep.PDSCH{1} = waveConfigRep.PDSCH{currentIdx};
+                    if length(waveformResourcesRep.PDSCH) > 1
+                        waveformResourcesRep.PDSCH(2:end) = [];
+                        waveConfigRep.PDSCH(2:end) = [];
+                    end
+
+                    % Repeat 'currentCfg' as per waveform repetitions
+                    [currentCfg,~,carrier] = hListTargetPDSCHs(waveConfigRep,waveformResourcesRep,targetRNTIsTmp,bwpIdx);
+                    currentCfg.ID = currentIdx;
+
+                    % Repeat 'pdschArray' ( which contains all PDSCHs for this BWP)  as per waveform repetitions
+                    pdschArray = hListTargetPDSCHs(waveConfig,waveformResources,targetRNTIsTmp,bwpIdx);
+                    carrier.NSlot = initialNSlot;
+
+                    % Extract PDCCH resources
+                    pdcchWaveCfg = [];
+                    pdcchDefs = [waveConfigRep.PDCCH{:}];
+                    for n = 1:pdcchCfgLen
+                        if any(pdcchDefs(n).BandwidthPartID == waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID)
+                            ri = waveformResources.PDCCH(n);
+                            ri.PDCCH = pdcchDefs(n);
+                            ri.ID = n;
+                            pdcchWaveCfg = [pdcchWaveCfg ri];
+                        end
+                    end
+
+                    activeSlots = [];
+                    for pIdx = 1:length(currentCfg)
+                        if ~isempty(currentCfg(pIdx).Resources)
+                            activeSlots = [activeSlots currentCfg(pIdx).Resources.NSlot]; %#ok<*AGROW>
+                        end
+                    end
+                    if ~isempty(activeSlots)
+                        activeSlots = unique(activeSlots);
+                    end
+                end
+
+                if nSlots == 0
+                    warning('No scheduled slots found for EVM processing');
+                    pdschCfgLen = 0;
+                    pdcchCfgLen = 0;
+                end
+
+                % Populate pdschObj of type 'nrPDSCHConfig'. It is to be used for
+                % Common Phase error (CPE) estimation and decoding PDSCH
+                [pdschObj,cdmLengths] = extractPdschCfg(currentCfg);
+                for idx = 1:length(currentCfg)
+                    pdschObj{idx}.NStartBWP = waveConfig.BandwidthParts{bwpIdx}.NStartBWP;
+                    pdschObj{idx}.NSizeBWP  = waveConfig.BandwidthParts{bwpIdx}.NSizeBWP;
+                    if isempty(pdschObj{idx}.NID)
+                        pdschObj{idx}.NID = carrier.NCellID;
+                    end
+                end
+
+                % Number of subcarriers in BWP
+                numSCs = size(rxGridLow,1);
+
+                % Locate DC for this carrier taking into account k0.
+                % 'dcIndCarrier' is in 1-based notation.
+                dcIndCarrier = (carrier.NSizeGrid*12)/2+1-k0;
+
+                % Locate the DC subcarrier location for this bandwidth part
+                % Adjust DC location based on BWP start
+                dcInd = dcIndCarrier - bwpStart*12;
+
+                % Disable DC exclusion if DC location is outside this BWP
+                if ((dcInd < 1 || dcInd > numSCs) && excludeDC == true)
+                    excludeDC = false;
+                end
+
+                if excludeDC
+
+                    % Exclude DC from received waveform and refGrid
+                    rxGridLow(dcInd,:,:) = 0;
+                    refGrid(dcInd,:,:) = 0;
+                    if size(rxGridLow,3) > 1
+
+                        % For number of layers > 1, exclude up to 6 subcarriers in refGrid,
+                        % on either side of DC, account for allocation edges in this.
+                        % This is needed to avoid channel estimates distortion (due
+                        % to exclusion of the DC reference from 'refGrid')
+                        dcIndLow = dcInd-5;
+                        dcIndHigh = dcInd+6;
+                        if dcIndLow < 1
+                            dcIndLow = 1;
+                        end
+                        if dcIndHigh > numSCs
+                            dcIndHigh = numSCs;
+                        end
+                        refGrid(dcIndLow:dcIndHigh,:) = 0;
+                    end
+                end
+
+                if pdschCfgLen
+                    rxGrids = cell(1,1+evm3GPP);
+                    rxGrids{1} = rxGridLow;
+                    if evm3GPP
+                        rxGrids{2} = rxGridHigh;
+                    end
+                    [HestLow,HestHigh] = hChannelEstEVM(rxGrids,refGrid,cdmLengths,L,true);
+                else
+                    HestLow = [];
+                    HestHigh = [];
+                end
+
+                % PDSCH REs may not always be present on the same set of RBs as DM-RS.
+                % For each such slot, extrapolate the channel coefficients to span the
+                % location of these PDSCH allocation regions
+
+                % Ensure slot has channel coefficients for the corresponding PDSCH
+                % allocation
+                if pdschCfgLen
+                    for slotIdx = 1:nSlots
+                        symIdx = (slotIdx-1)*L+1:slotIdx*L;
+                        symIdx(symIdx>size(rxGridLow, 2)) = [];
+
+                        % Locate RBs where channel coefficients are present
+                        [row ,~]= find(HestLow(:,symIdx));
+                        row = unique(row);
+                        HestRb = unique(floor((row-1)/12));
+                        rxRb = [];
+                        for idx = 1:length(currentCfg)
+                            if any(activeSlots == (slotIdx-1+initialNSlot))
+                                rxRb = [rxRb currentCfg(idx).PDSCH.PRBSet];
+                            end
+                        end
+
+                        % Set extrapolateHest to true if allocated RB list does not match
+                        % list of RBs containing channel coefficients
+                        extrapolateHest = false;
+                        for rbIdx = 1:length(rxRb)
+                            if ~any(HestRb == rxRb(rbIdx))
+                                extrapolateHest = true;
+                                break;
+                            end
+                        end
+
+                        % Process only for slots where PDSCH RBs do not contain channel
+                        % estimates. Using the 'nearest' interpolation method, extrapolate
+                        % the channel coefficients over the slot span. This method ensures
+                        % the same channel coefficient is extrapolated over the neighboring
+                        % frequency region. The first entry in the currentCfg is sufficient
+                        % for this purpose
+                        if extrapolateHest && ~isempty(HestRb)
+                            firstDmrsLocInSlot = currentCfg(1).PDSCH.DMRS.DMRSSubcarrierLocations(1)+1;
+
+                            R = size(HestLow,3);
+                            P = size(HestLow,4);
+                            for p = 1:P
+                                for r = 1:R
+                                    H_tmp = HestLow(:,symIdx(firstDmrsLocInSlot),r,p);
+                                    if sum(abs(H_tmp)) == 0
+                                        interpEqCoeff = 1e-16.*ones(size(H_tmp,1),1);
+                                    else
+                                        interpEqCoeff = interp1(find(H_tmp~=0),H_tmp(H_tmp~=0),(1:numSCs).','nearest','extrap');
+                                    end
+                                    interpEqCoeff = repmat(interpEqCoeff,1,L);
+                                    HestLow(:,symIdx,r,p) = interpEqCoeff;
+                                end
+                            end
+                        end
+                    end
+                end
+
+                % In case of non-3GPP case, only a single EVM grid is used.
+                % Compute the DL EVM for each active/valid DL slot, store
+                % the results in a cell-array for later processing. Skip
+                % slots which are not active.
+                slotRange = activeSlots(activeSlots < (initialNSlot+nSlots));
+                slotRange = slotRange(slotRange >= initialNSlot);
+                if isempty(slotRange) && pdschEnable && ~isempty(currentCfg)
+
+                    % display warning only if the waveform is more than a subframe long
+                    if nSlots > ofdmInfo.SlotsPerSubframe
+                        warning('No scheduled slots found for EVM processing');
+                    end
+                    invalidCfgCount = invalidCfgCount+1;
+                    continue;
+                end
+
+                % Concatenate rxGridLow, rxGridHigh, HestLow and HestLow for
+                % further processing
+                rxGrids = cell(1,1+evm3GPP);
+                hest  = cell(1,1+evm3GPP);
+                rxGrids{1} = rxGridLow;
+                hest{1} = HestLow;
+                if evm3GPP
+                    rxGrids{2} = rxGridHigh;
+                    hest{2} = HestHigh;
+                end
+
+                if pdschCfgLen
+                    [eqSlotGrids,refSlotGrids,...
+                        ~,eqSyms,refSyms,rxSyms] = hDecodeSlots(carrier,rxGrids,hest,...
+                        currentCfg,pdschObj,waveformPeriod);
+
+                    % Extract equalized and reference slot based grids on a channel
+                    % specific basis
+                    eqSlotGrid = eqSlotGrids.PXYCH;
+                    refSlotGrid = refSlotGrids.PXYCH;
+
+                    dmrsEqSlotGrid = eqSlotGrids.DMRS;
+                    dmrsRefSlotGrid = refSlotGrids.DMRS;
+
+                    ptrsEqSlotGrid = eqSlotGrids.PTRS;
+                    ptrsRefSlotGrid = refSlotGrids.PTRS;
+
+                    % Extract equalized and reference symbols on a channel specific
+                    % basis
+                    eqSym = eqSyms.PXYCH;
+                    refSym = refSyms.PXYCH;
+                    dmrsEqSym = eqSyms.DMRS;
+                    dmrsRefSym = refSyms.DMRS;
+                    ptrsEqSym = eqSyms.PTRS;
+                    ptrsRefSym = refSyms.PTRS;
+                    rxSym = rxSyms.PXYCH;
+                    dmrsRxSym = rxSyms.DMRS;
+                    ptrsRxSym = rxSyms.PTRS;
+                    powerPerRE =  mag2db(rms(rxSym{:})) + 30;
+                    dmrsPowerPerRE =  mag2db(rms(dmrsRxSym{:})) + 30;
+                    if ~isempty(ptrsRxSym{1})
+                        ptrsPowerPerRE =  mag2db(rms(ptrsRxSym{:})) + 30;
+                    else
+                        ptrsPowerPerRE = -Inf;
+                    end
+
+                    if excludeDC
+
+                        % Exclude DC subcarrier symbols in eqSym, refSym,
+                        % eqSlotGrid & refSlotGrid
+                        d = find(refSym{1} == 0);
+                        eqSym{1}(d) = [];
+                        refSym{1}(d) = [];
+                        dmrsEqSym{1}(d) = [];
+                        dmrsRefSym{1}(d) = [];
+                        dmrsRefSlotGrid(dcInd,:,:,:) = 0;
+                        dmrsEqSlotGrid(dcInd,:,:,:) = 0;
+                        if evm3GPP
+                            eqSlotGrid(dcInd,:,:,:) = 0;
+                            refSlotGrid(dcInd,:,:,:) = 0;
+                            d = find(refSym{2} == 0);
+                            eqSym{2}(d) = [];
+                            refSym{2}(d) = [];
+                            dmrsEqSym{2}(d) = [];
+                            dmrsRefSym{2}(d) = [];
+                        end
+                    end
+
+                    % Extract only the relevant number of layers for 'cEq'
+                    % & 'cRef'
+                    numLayers = currentCfg.PDSCH.NumLayers;
+                    cEq= eqSlotGrid(:,:,1:numLayers,:);
+                    cRef = refSlotGrid(:,:,1:numLayers,:);
+
+                    % Combine the channel specific equalized and reference
+                    % grids on a BWP basis. Ensure the dimensions match by
+                    % repetition before combining.
+                    if ismember(currentCfg.PDSCH.RNTI,targetRNTIsTmp)
+                        if bwpInitCount == 0
+                            [nSC,nSym,~,nD] = size(refSlotGrid);
+                            perBWPEq = zeros([nSC nSym maxLayers nD]);
+                            perBWPRef = zeros([nSC nSym maxLayers nD]);
+                            perBWPDMRSEq = zeros([nSC nSym maxLayers nD]);
+                            perBWPDMRSRef = zeros([nSC nSym maxLayers nD]);
+                            perBWPPTRSEq = zeros([nSC nSym 1 nD]);
+                            perBWPPTRSRef = zeros([nSC nSym 1 nD]);
+                            bwpInitCount = bwpInitCount+1;
+                        end
+                        perBWPRef(:,:,1:numLayers,1:nD) = perBWPRef(:,:,1:numLayers,1:nD) + refSlotGrid(:,:,1:numLayers,1:nD);
+                        perBWPEq(:,:,1:numLayers,1:nD) = perBWPEq(:,:,1:numLayers,1:nD) + eqSlotGrid(:,:,1:numLayers,1:nD);
+                        perBWPDMRSRef(:,:,1:numLayers,1:nD) = perBWPDMRSRef(:,:,1:numLayers,1:nD) + dmrsRefSlotGrid(:,:,1:numLayers,1:nD);
+                        perBWPDMRSEq(:,:,1:numLayers,1:nD) = perBWPDMRSEq(:,:,1:numLayers,1:nD) + dmrsEqSlotGrid(:,:,1:numLayers,1:nD);
+                        perBWPPTRSRef = perBWPPTRSRef + ptrsRefSlotGrid;
+                        perBWPPTRSEq = perBWPPTRSEq + ptrsEqSlotGrid;
+
+                        additionalCols = maxLayers-numLayers;
+                        for i = 1:evm3GPP+1
+                            eqSymBwp{i,bwpIdx} = [eqSymBwp{i,bwpIdx}; [eqSym{i} repmat(eqSym{i}(:,numLayers),1,additionalCols)]];
+                            refSymBwp{i,bwpIdx} = [refSymBwp{i,bwpIdx}; [refSym{i} repmat(refSym{i}(:,numLayers),1,additionalCols)]];
+                            dmrsRefSymBwp{i,bwpIdx} = [dmrsRefSymBwp{i,bwpIdx}; [dmrsRefSym{i} repmat(dmrsRefSym{i}(:,numLayers),1,additionalCols)]];
+                            dmrsEqSymBwp{i,bwpIdx} = [dmrsEqSymBwp{i,bwpIdx}; [dmrsEqSym{i} repmat(dmrsEqSym{i}(:,numLayers),1,additionalCols)]];
+                            ptrsEqSymBwp{i,bwpIdx} = [ptrsEqSymBwp{i,bwpIdx}; ptrsEqSym{i}];
+                            ptrsRefSymBwp{i,bwpIdx} = [ptrsRefSymBwp{i,bwpIdx}; ptrsRefSym{i}];
+                        end
+                    end
+                    tmp = hEVM(carrier,cEq,cRef);
+
+                    % Extract DM-RS equalized and reference grids for EVM
+                    % calculation, for the relevant number of layers.
+                    dEq = dmrsEqSlotGrid(:,:,1:numLayers,:);
+                    dRef = dmrsRefSlotGrid(:,:,1:numLayers,:);
+                    tmpDmrs = hEVM(carrier,dEq,dRef);
+
+                    % Extract PT-RS equalized and reference grids for EVM
+                    % calculation, for the relevant number of ports.
+                    pEq = ptrsEqSlotGrid(:,:,1,:);
+                    pRef = ptrsRefSlotGrid(:,:,1,:);
+                    tmpPtrs = hEVM(carrier,pEq,pRef);
+
+                    % Store DM-RS and PT-RS EVM statistics along with
+                    % current PDSCH EVM statistics.
+                    evmDmrs = tmpDmrs.EVM;
+                    evmPtrs = tmpPtrs.EVM;
+                    % Remove EVM field as it not part of the output
+                    if ~isempty(tmp)
+                        tmp = rmfield(tmp,'EVM');
+                    end
+                    if ~isempty(tmpDmrs)
+                        tmpDmrs = rmfield(tmpDmrs,'EVM');
+                    end
+                    if ~isempty(tmpPtrs)
+                        tmpPtrs = rmfield(tmpPtrs,'EVM');
+                    end
+                    pdschEVMCfg(currentIdx).SubcarrierRMS = tmp.SubcarrierRMS;
+                    pdschEVMCfg(currentIdx).SubcarrierPeak = tmp.SubcarrierPeak;
+                    pdschEVMCfg(currentIdx).SymbolRMS = tmp.SymbolRMS;
+                    pdschEVMCfg(currentIdx).SymbolPeak = tmp.SymbolPeak;
+                    pdschEVMCfg(currentIdx).SlotRMS = tmp.SlotRMS;
+                    pdschEVMCfg(currentIdx).SlotPeak = tmp.SlotPeak;
+                    pdschEVMCfg(currentIdx).EVMGrid = tmp.EVMGrid;
+                    pdschEVMCfg(currentIdx).OverallEVM = tmp.OverallEVM;
+                    pdschEVMCfg(currentIdx).DMRS = tmpDmrs;
+                    pdschEVMCfg(currentIdx).DMRS.PowerPerRE = dmrsPowerPerRE;
+                    pdschEVMCfg(currentIdx).PTRS = tmpPtrs;
+                    pdschEVMCfg(currentIdx).PTRS.PowerPerRE = ptrsPowerPerRE;
+                    pdschEVMCfg(currentIdx).BandwidthPartID = waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID;
+                    pdschEVMCfg(currentIdx).RNTI = currentCfg.PDSCH.RNTI;
+                    pdschEVMCfg(currentIdx).EqSym = eqSym;
+                    pdschEVMCfg(currentIdx).RefSym = refSym;
+                    pdschEVMCfg(currentIdx).DmrsEqSym = dmrsEqSym;
+                    pdschEVMCfg(currentIdx).DmrsRefSym = dmrsRefSym;
+                    pdschEVMCfg(currentIdx).PtrsEqSym = ptrsEqSym;
+                    pdschEVMCfg(currentIdx).PtrsRefSym = ptrsRefSym;
+                    pdschEVMCfg(currentIdx).Name = currentCfg.Name;
+                    pdschEVMCfg(currentIdx).ID = currentCfg.ID;
+                    pdschEVMCfg(currentIdx).PowerPerRE = powerPerRE;                    
+                end
+            end
+
+            % Calculate PDSCH EVM statistics for this BWP
+            if invalidCfgCount == length(pdschDefs)
+                pdschCfgLen = 0;
+            end
+
+            if pdschCfgLen
+                pdschEVMBwp = hEVM(carrier,perBWPEq,perBWPRef);
+                pdschDmrsEVMBwp = hEVM(carrier,perBWPDMRSEq,perBWPDMRSRef);
+                pdschPtrsEVMBwp = hEVM(carrier,perBWPPTRSEq,perBWPPTRSRef);
+
+                pdschEvm = pdschEVMBwp.EVM;
+                evmDmrs = pdschDmrsEVMBwp.EVM;
+                evmPtrs = pdschPtrsEVMBwp.EVM;
+
+                pdschEVMBwp.BandwidthPartID = waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID;
+                pdschEVMBwp.AverageFO = averageFO;
+                pdschEVMBwp.AmpImbalance = ampImbEst;
+                pdschEVMBwp.PhImbalance = phImbEst;
+                pdschDmrsEVMBwp = rmfield(pdschDmrsEVMBwp,'EVM');
+                pdschEVMBwp.DMRS = pdschDmrsEVMBwp;
+                pdschPtrsEVMBwp = rmfield(pdschPtrsEVMBwp,'EVM');
+                pdschEVMBwp.PTRS = pdschPtrsEVMBwp;
+            else
+                pdschEVMBwp = [];
+            end
+
+            activeSlots = [];
+            for pIdx = 1:pdschCfgLen
+                if ~isempty(pdschArray(pIdx).Resources)
+                    activeSlots = [activeSlots pdschArray(pIdx).Resources.NSlot];
+                end
+            end
+            if ~isempty(activeSlots)
+                activeSlots = unique(activeSlots);
+            end
+            slotRange = activeSlots(activeSlots < (initialNSlot+nSlots));
+            slotRange = slotRange(slotRange >= initialNSlot);
+
+            if displayEVM && (pdschCfgLen)
+                disp("EVM stats for BWP idx : " + num2str(bwpIdx));
+            end
+            for slotIdx  = slotRange
+                for e = 1:nEVMWindowLocations
+                    if (e == 1)
+                        edge = 'Low edge ';
+                        if nEVMWindowLocations == 1
+                            edge = '';              % Print only single EVM per slot
+                        end
+                    else
+                        edge = 'High edge ';
+                    end
+                    if displayEVM
+                        fprintf('%sPDSCH RMS EVM, Peak EVM, slot %d: %0.3f %0.3f%%\n',edge,slotIdx,pdschEvm(e, slotIdx+1).RMS*100,pdschEvm(e, slotIdx+1).Peak*100);
+                        fprintf('%sDM-RS RMS EVM, Peak EVM, slot %d: %0.3f %0.3f%%\n',edge,slotIdx,evmDmrs(e, slotIdx+1).RMS*100,evmDmrs(e, slotIdx+1).Peak*100);
+                        if ~isempty(ptrsEqSymBwp{bwpIdx})
+                            fprintf('%sPT-RS RMS EVM, Peak EVM, slot %d: %0.3f %0.3f%%\n',edge,slotIdx,evmPtrs(e, slotIdx+1).RMS*100,evmPtrs(e, slotIdx+1).Peak*100);
+                        end
+                    end
+                end
+            end
+
+            if isempty(evmInfo)
+                evmInfo.PDSCH = [];
+                evmInfo.PDCCH = [];
+            end
+
+            % Concatenate PDSCHs for each BWP
+            evmInfo.PDSCH = [evmInfo.PDSCH pdschEVMBwp];
+
+            % Loop for each PDCCH configuration in this BWP
+            pdcchEqSlotPerBWP = 0;
+            pdcchRefSlotPerBWP = 0;
+            pdcchDmrsEqSlotPerBWP = 0;
+            pdcchDmrsRefSlotPerBWP = 0;
+
+            for pdcchCfgIdx = 1:size(pdcchWaveCfg,2)
+                % Store the current PDCCH
+                currentPdcchCfg = pdcchWaveCfg(pdcchCfgIdx);
+                pdcchSlotRange = [];
+                if currentPdcchCfg.PDCCH.Enable
+
+                    % Generate a reference grid, refGrid, for slots corresponding to
+                    % the length of the input waveform. This grid contains only the
+                    % DM-RS and is primarily used for channel estimation.
+                    refGrid = hReferenceGrid(carrier,bwpCfg,currentPdcchCfg,nSlots,'PDCCH',waveformPeriod);
+
+                    % Slot allocation list for the PDCCH configuration
+                    activeSlots = [currentPdcchCfg.Resources.NSlot];
+
+                    % Resize refGrid based on BWP dimensions
+                    refGrid = refGrid(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+
+                    % Demodulate the waveform
+                    pdcchRxGrid = nrOFDMDemodulate(carrier,rxWaveform,'SampleRate',sampleRate,'CarrierFrequency',waveConfig.CarrierFrequency + k0Offset);
+
+                    % Work only on the relevant BWP in the waveform to simplify indexing
+                    pdcchRxGrid = pdcchRxGrid(12*bwpStart+1:12*(bwpStart+bwpCfg.NSizeBWP),:,:);
+
+                    % Compute the PDCCH EVM for each active/valid PDCCH slots, store the results
+                    % in a cell-array for later processing. Skip slots which are not allocated
+                    pdcchSlotRange = activeSlots(activeSlots < initialNSlot+nSlots);
+                    pdcchSlotRange = pdcchSlotRange(pdcchSlotRange >= initialNSlot);
+                    if isempty(pdcchSlotRange)
+                        pdcchSlotRange = [];
+                        plotEVM = false;
+
+                        % display warning only if the waveform is more than a subframe long
+                        if nSlots > ofdmInfo.SlotsPerSubframe
+                            warning('No scheduled slots found for EVM processing');
+                        end
+                    end
+
+                    % Obtain channel estimates
+                    pdcchHest = hChannelEstEVM({pdcchRxGrid},refGrid,currentPdcchCfg.CDMLengths,L,false);
+
+                    % Decode the slots with PDCCH
+                    [eqs,refs,~,eqSyms,refSyms,rxSyms] = hDecodeSlots(carrier,{pdcchRxGrid},{pdcchHest},...
+                        currentPdcchCfg,[],waveformPeriod);
+
+                    % Extract slot based grids for equalized and reference
+                    % PDCCH channel and PDCCH DM-RS
+                    pdcchEqSlotGrid = eqs.PXYCH;
+                    pdcchRefSlotGrid = refs.PXYCH;
+                    pdcchDmrsEqSlotGrid = eqs.DMRS;
+                    pdcchDmrsRefSlotGrid = refs.DMRS;
+                    pdcchEqSym = eqSyms.PXYCH;
+                    pdcchRefSym = refSyms.PXYCH;
+                    pdcchDmrsEqSym = eqSyms.DMRS;
+                    pdcchDmrsRefSym = refSyms.DMRS;
+                    dmrsRxSym = rxSyms.DMRS;
+                    pdcchRxSym = rxSyms.PXYCH;
+                    pdcchPowerPerRE = mag2db(rms(pdcchRxSym{:})) + 30;
+                    pdcchDmrsPowerPerRE = mag2db(rms(dmrsRxSym{:})) + 30;
+
+                    perBWPPdcchEq = perBWPPdcchEq + pdcchEqSlotGrid;
+                    perBWPPdcchRef = perBWPPdcchRef + pdcchRefSlotGrid;
+
+                    if excludeDC
+
+                        % Exclude DC subcarrier symbols in pdcchEqSym, pdcchRefSym,
+                        % pdcchEqSlotGrid & refSlotGrid
+                        d = find(pdcchEqSym{1} == 0);
+                        if ~isempty(d)
+                            pdcchEqSym{1}(d) = [];
+                            pdcchRefSym{1}(d) = [];
+                            pdcchDmrsEqSym{1}(d) = [];
+                            pdcchDmrsRefSym{1}(d) = [];
+                        end
+                        if evm3GPP && ~isempty(d)
+                            pdcchEqSlotGrid(dcInd,:,:,:) = 0;
+                            pdcchRefSlotGrid(dcInd,:,:,:) = 0;
+                            pdcchDmrsEqSlotGrid(dcInd,:,:,:) = 0;
+                            pdcchDmrsRefSlotGrid(dcInd,:,:,:) = 0;
+
+                            d = find(pdcchEqSym{2} == 0);
+                            pdcchEqSym{2}(d) = [];
+                            pdcchRefSym{2}(d) = [];
+                            pdcchDmrsEqSym{2}(d) = [];
+                            pdcchDmrsRefSym{2}(d) = [];
+                        end
+                    end
+                    % Evaluate detailed EVM statistics for a grid of PDCCH equalized and reference slot
+                    % if pdcchCfgLen
+                    tmp  = hEVM(carrier,pdcchEqSlotGrid,pdcchRefSlotGrid);
+                    tmpDmrs = hEVM(carrier,pdcchDmrsEqSlotGrid,pdcchDmrsRefSlotGrid);
+                    evmPdcchDMRS = tmpDmrs.EVM;
+                    evmPdcch = tmp.EVM;
+                    if ~isempty(tmp)
+                        tmp = rmfield(tmp,'EVM');
+                    end
+                    pdcchEVMCfg(pdcchCfgIdx).SubcarrierRMS = tmp.SubcarrierRMS;
+                    pdcchEVMCfg(pdcchCfgIdx).SubcarrierPeak = tmp.SubcarrierPeak;
+                    pdcchEVMCfg(pdcchCfgIdx).SymbolRMS = tmp.SymbolRMS;
+                    pdcchEVMCfg(pdcchCfgIdx).SymbolPeak = tmp.SymbolPeak;
+                    pdcchEVMCfg(pdcchCfgIdx).SlotRMS = tmp.SlotRMS;
+                    pdcchEVMCfg(pdcchCfgIdx).SlotPeak = tmp.SlotPeak;
+                    pdcchEVMCfg(pdcchCfgIdx).EVMGrid = tmp.EVMGrid;
+                    pdcchEVMCfg(pdcchCfgIdx).OverallEVM = tmp.OverallEVM;
+                    pdcchEVMCfg(pdcchCfgIdx).DMRS = tmpDmrs;
+                    pdcchEVMCfg(pdcchCfgIdx).DMRS.PowerPerRE = pdcchDmrsPowerPerRE;
+                    pdcchEVMCfg(pdcchCfgIdx).BandwidthPartID = waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID;
+                    pdcchEVMCfg(pdcchCfgIdx).RNTI = currentPdcchCfg.PDCCH.RNTI;
+                    pdcchEVMCfg(pdcchCfgIdx).EqSym = pdcchEqSym;
+                    pdcchEVMCfg(pdcchCfgIdx).RefSym = pdcchRefSym;
+                    pdcchEVMCfg(pdcchCfgIdx).DmrsEqSym = pdcchDmrsEqSym;
+                    pdcchEVMCfg(pdcchCfgIdx).DmrsRefSym = pdcchDmrsRefSym;
+                    pdcchEVMCfg(pdcchCfgIdx).Name = currentPdcchCfg.Name;
+                    pdcchEVMCfg(pdcchCfgIdx).ID = currentPdcchCfg.ID;
+                    pdcchEVMCfg(pdcchCfgIdx).PowerPerRE = pdcchPowerPerRE;
+                    
+                    if ~isempty(pdcchEqSlotGrid)
+                        pdcchEqSlotPerBWP = pdcchEqSlotPerBWP + pdcchEqSlotGrid;
+                        pdcchRefSlotPerBWP = pdcchRefSlotPerBWP + pdcchRefSlotGrid;
+                        pdcchDmrsEqSlotPerBWP = pdcchEqSlotPerBWP + pdcchDmrsEqSlotGrid;
+                        pdcchDmrsRefSlotPerBWP = pdcchRefSlotPerBWP + pdcchDmrsRefSlotGrid;
+
+                        pdcchEqSymBwp{:,bwpIdx} = [pdcchEqSymBwp{:,bwpIdx}; pdcchEqSym{:}];
+                        pdcchRefSymBwp{:,bwpIdx} = [pdcchRefSymBwp{:,bwpIdx}; pdcchRefSym{:}];
+                        pdcchDmrsEqSymBWP{:,bwpIdx} = [pdcchDmrsEqSymBWP{:,bwpIdx}; pdcchDmrsEqSym{:}];
+                        pdcchDmrsRefSymBWP{:,bwpIdx} = [pdcchDmrsRefSymBWP{:,bwpIdx}; pdcchDmrsRefSym{:}];
+                    end
+                end
+            end
+
+            if pdcchCfgLen > 0
+                pdcchEVMBwp = hEVM(carrier,pdcchEqSlotPerBWP,pdcchRefSlotPerBWP);
+                pdcchEVMDmrsBwp = hEVM(carrier,pdcchDmrsEqSlotPerBWP,pdcchDmrsRefSlotPerBWP);
+                pdcchEVMBwp.BandwidthPartID = waveConfig.BandwidthParts{bwpIdx}.BandwidthPartID;
+                pdcchEVMBwp.AverageFO = averageFO;
+                pdcchEVMBwp.AmpImbalance = ampImbEst;
+                pdcchEVMBwp.PhImbalance = phImbEst;
+                pdcchEVMBwp.DMRS = pdcchEVMDmrsBwp;
+                evmPdcch = pdcchEVMBwp.EVM;
+            else
+                pdcchEVMBwp = [];
+            end
+            evmInfo.PDCCH = [evmInfo.PDCCH pdcchEVMBwp];
+
+            if displayEVM && pdcchCfgLen
+                for slotIdx = pdcchSlotRange
+                    fprintf('PDCCH RMS EVM, Peak EVM, slot %d: %0.3f %0.3f%%\n',slotIdx,evmPdcch(1, slotIdx+1).RMS*100,evmPdcch(1, slotIdx+1).Peak*100);
+                    fprintf('PDCCH DM-RS RMS EVM, Peak EVM, slot %d: %0.3f %0.3f%%\n',slotIdx,evmPdcchDMRS(1, slotIdx+1).RMS*100,evmPdcchDMRS(1, slotIdx+1).Peak*100);
+                end
+            end
+        else
+            nFrames = 0;
+        end
+
+        printFrameAvg = 1;      % Ensures only fully occupied frames are printed
+        % After we've filled a frame or if we're at the end of a signal
+        % shorter than a frame, do EVM averaging
+        if (nFrames == 0)
+            nFrames = 1;     % Below loop needs to run at least once
+            printFrameAvg = 0; % Don't print low/high EVM as we don't have sufficient slots to fill up a frame
+        end
+
+        % Store EVM statistics for each valid configuration and channel
+        perCfg.PDSCH = pdschEVMCfg;
+        perCfg.PDCCH = pdcchEVMCfg;
+
+        % loop through each frame, selecting the frames with higher RMS( when
+        % measuring 3GPP EVM)
+        if pdschCfgLen
+
+            % 1-based indexing for accessing evm
+            % Limit frame-averaging to complete frames only
+            slotRange = slotRange+1;
+            slotRange = slotRange(slotRange <= (nFrames*10*ofdmInfo.SlotsPerSubframe));
+
+            for frameIdx = 0:nFrames-1
+
+                % Pick slots in this frame
+                L = 10*ofdmInfo.SlotsPerSubframe;
+                slotsInFrame = slotRange((slotRange > (frameIdx)*L) & (slotRange <= (frameIdx+1)*L));
+                frameLowEVM = hRawEVM(cat(1,pdschEVMBwp.EVM(1,slotsInFrame).EV));
+                frameEVM(frameIdx+1) = frameLowEVM;
+               
+                if evm3GPP
+                    frameHighEVM = hRawEVM(cat(1,pdschEVMBwp.EVM(2,slotsInFrame).EV));
+                    if frameHighEVM.RMS > frameLowEVM.RMS
+                        frameEVM(frameIdx+1) = frameHighEVM;
+                    end
+                end
+                if printFrameAvg && displayEVM
+                    if evm3GPP
+                        fprintf('Averaged low edge RMS EVM, frame %d: %0.3f%%\n',frameIdx,frameLowEVM.RMS*100);
+                        fprintf('Averaged high edge RMS EVM, frame %d: %0.3f%%\n',frameIdx,frameHighEVM.RMS*100);
+                    end
+                    fprintf('Averaged RMS EVM frame %d: %0.3f%%\n',frameIdx,frameEVM(frameIdx+1).RMS*100);
+                end
+            end
+        end
+        if isempty(evmInfo)
+            pdschCfgLen = 0;
+            pdcchCfgLen = 0;
+        end
+        if plotEVM
+            % For each valid slot, update the plot (symbol,SC,slot,grid-wise)
+            if pdschCfgLen
+                pIdx = find([evmInfo.PDSCH(:).BandwidthPartID] == bwpCfg.BandwidthPartID);
+                hEVMPlots(evmInfo.PDSCH(pIdx),eqSymBwp{1,bwpIdx},refSymBwp{1,bwpIdx},'PDSCH');
+            end
+            if pdcchCfgLen
+                pIdx = find([evmInfo.PDCCH(:).BandwidthPartID] == bwpCfg.BandwidthPartID);
+                hEVMPlots(evmInfo.PDCCH(pIdx),pdcchEqSymBwp{1,bwpIdx},pdcchRefSym{1,bwpIdx},'PDCCH');
+            end
+        end
+
+        if displayEVM
+            if pdschCfgLen
+                pIdx = find([evmInfo.PDSCH(:).BandwidthPartID] == bwpCfg.BandwidthPartID);
+                fprintf('Averaged overall PDSCH RMS EVM: %0.3f%%\n', evmInfo.PDSCH(pIdx).OverallEVM.RMS*100);
+                disp("Overall PDSCH Peak EVM = " + string((evmInfo.PDSCH(pIdx).OverallEVM.Peak)*100) + "%");
+            end
+            if pdcchCfgLen
+                pIdx = find([evmInfo.PDCCH(:).BandwidthPartID] == bwpCfg.BandwidthPartID);
+                fprintf('Averaged overall PDCCH RMS EVM: %0.3f%%\n', evmInfo.PDCCH(pIdx).OverallEVM.RMS*100);
+                disp("Overall PDCCH Peak EVM = " + string((evmInfo.PDCCH(pIdx).OverallEVM.Peak)*100) + "%");
+            end
+        end
+    end
+    if ~isempty(evmInfo)
+        evmInfo.PerCfg = perCfg;
+    end
+end
+
+function W = getEVMWindow(carrier,frequencyRange,channelBandwidth,nFFT)
+%   W = getEVMWindow(CARRIER,FREQUENCYRANGE,CHANNELBANDWIDTH,NFFT) is the
+%   error vector magnitude window length, as mentioned in TS 38.104,
+%   Section B.5.2 (FR1) and section C.5.2 (FR2). W is defined for a given
+%   combination of subcarrier spacing, channel bandwidth/fft length,
+%   frequency range and CP type. W is subsequently used as an intermediate
+%   value to decide the CP Fraction for OFDM demodulation
+
+    scsFR1 = [15 30 60];
+    scsFR2 = [60 120 480 960];
+    nfftFR1 = [256 384 512 768 1024 1536 2048 3072  4096];
+    WsFR1   = [NaN NaN  14 NaN   28   44   58  108   144;      % NormalCp, 15kHz
+                 8 NaN  14  22   28   54   72  130   172;      % NormalCp, 30kHz
+                 8  11  14  26   36   64   86  NaN   NaN;      % NormalCp, 60kHz
+                54  80 106 164  220  340  454  NaN   NaN];     % ExtendedCp, 60kHz
+    nfftFR2 = [512 1024 2048 4096];
+    WsFR2   = [NaN   36   72  144;                             % NormalCP, 60kHz
+               18    36   72  144;                             % NormalCP, 120kHz
+               NaN   36   72  144;                             % NormalCP, 480kHz
+               36    72   144 NaN;                             % NormalCP, 960kHz
+               NaN  220  440  880];                            % ExtendedCP, 60kHz
+    W = []; %#ok<NASGU>
+    if (strcmpi(frequencyRange,'FR1'))
+        rowIdx = find(carrier.SubcarrierSpacing == scsFR1) + double(strcmpi(carrier.CyclicPrefix,'extended'));
+        W = WsFR1(rowIdx,nFFT == nfftFR1);
+        if channelBandwidth == 25
+            if nFFT == 512 && carrier.SubcarrierSpacing == 60
+                if strcmpi(carrier.CyclicPrefix,'extended')
+                    W = 110;
+                else
+                    W = 18;
+                end
+            elseif nFFT == 1024 && carrier.SubcarrierSpacing == 30
+                W = 36;
+            elseif nFFT == 2048 && carrier.SubcarrierSpacing == 15
+                W = 72;
+            end
+        end
+    else
+        rowIdx = find(carrier.SubcarrierSpacing == scsFR2) + double(strcmpi(carrier.CyclicPrefix,'extended'))*4;
+        W = WsFR2(rowIdx,nFFT == nfftFR2);
+    end
+    % Filter out invalid combinations
+    if anynan(W) || isempty(W)
+        error('Invalid FFT/SCS/BW combination');
+    end
+end
+
+function [pdschObj,cdmLengths] = extractPdschCfg(pdschWaveCfg)
+    % Extract relevant parameters from waveform generator PDSCH struct to build an obj of type 'nrPDSCHConfig' 
+    % Set PDSCH parameters
+    pdschObj = {};
+    cdmLengths = [];
+    for idx = 1:length(pdschWaveCfg)
+        pdschObj{idx} = nrPDSCHConfig;
+        pdsch = pdschWaveCfg(idx).PDSCH;
+        pdschObj{idx}.PRBSet = pdsch.PRBSet;
+        pdschObj{idx}.SymbolAllocation     = pdsch.SymbolAllocation;
+        pdschObj{idx}.Modulation           = pdsch.Modulation;
+        pdschObj{idx}.NumLayers            = pdsch.NumLayers;
+        pdschObj{idx}.MappingType          = pdsch.MappingType;
+        pdschObj{idx}.RNTI                 = pdsch.RNTI;
+        pdschObj{idx}.NID                  = pdsch.NID;
+        pdschObj{idx}.VRBToPRBInterleaving = pdsch.VRBToPRBInterleaving;
+        pdschObj{idx}.VRBBundleSize        = pdsch.VRBBundleSize;
+
+        for idx2 = 1:length(pdsch.ReservedPRB)
+            pdschObj{idx}.ReservedPRB{idx2} = nrPDSCHReservedConfig;     
+            pdschObj{idx}.ReservedPRB{idx2}.PRBSet    = pdsch.ReservedPRB{idx2}.PRBSet;
+            pdschObj{idx}.ReservedPRB{idx2}.SymbolSet = pdsch.ReservedPRB{idx2}.SymbolSet;
+            pdschObj{idx}.ReservedPRB{idx2}.Period    = pdsch.ReservedPRB{idx2}.Period;
+        end
+
+        % Set DM-RS parameters
+        pdschObj{idx}.DMRS = pdsch.DMRS;
+
+        % Set PT-RS parameters
+        pdschObj{idx}.EnablePTRS = pdsch.EnablePTRS;
+        pdschObj{idx}.PTRS = pdsch.PTRS;
+
+        if pdschWaveCfg(idx).PDSCH.Enable && sum(pdschWaveCfg(idx).CDMLengths)
+            cdmLengths = pdschWaveCfg(idx).CDMLengths;
+        end
+    end
+end
+
+function validateInputs(waveconfig,evmCfg)
+%   validateInputs(WAVECONFIG,CFG)
+%   validates the waveform configuration WAVECONFIG and evm configuration
+%   EVMCFG used for EVM measurement.
+
+    fcnName = 'hNRDownlinkEVM';
+
+    % Validate 'waveconfig'
+    if ~isa(waveconfig,'nrDLCarrierConfig')
+        error('Input waveform configuration must be of type: nrDLCarrierConfig');
+    end
+    % Validate 'evmCfg'
+    if isfield(evmCfg,'Evm3GPP')
+        validateattributes(evmCfg.Evm3GPP,{'logical','double'},{'nonempty'},fcnName,'Evm3GPP');
+    end
+    if isfield(evmCfg,'TargetRNTIs') && ~isempty(evmCfg.TargetRNTIs)
+        validateattributes(evmCfg.TargetRNTIs,{'numeric'},{'vector'},fcnName,'TargetRNTIs');
+    end
+    if isfield(evmCfg,'PlotEVM')
+        validateattributes(evmCfg.PlotEVM,{'logical','double'},{'nonempty'},fcnName,'PlotEVM');
+    end
+    if isfield(evmCfg,'DisplayEVM')
+        validateattributes(evmCfg.DisplayEVM,{'logical','double'},{'nonempty'},fcnName,'DisplayEVM');
+    end
+    if isfield(evmCfg,'InitialNSlot')
+        validateattributes(evmCfg.InitialNSlot,{'numeric'},{'nonnegative'},fcnName,'InitialNSlot');
+    end
+    if isfield(evmCfg,'SampleRate')
+        validateattributes(evmCfg.SampleRate,{'numeric'},{'integer','positive'},fcnName,'SampleRate');
+    end
+    if isfield(evmCfg,'PdschEnable')
+        validateattributes(evmCfg.PdschEnable,{'logical','double'},{'nonempty'},fcnName,'PdschEnable');
+    end
+    if isfield(evmCfg,'PdcchEnable')
+        validateattributes(evmCfg.PdcchEnable,{'logical','double'},{'nonempty'},fcnName,'PdcchEnable');
+    end
+    if isfield(evmCfg,'CorrectCoarseFO')
+        validateattributes(evmCfg.CorrectCoarseFO,{'logical','double'},{'nonempty'},fcnName,'CorrectCoarseFO');
+    end
+    if isfield(evmCfg,'CorrectFineFO')
+        validateattributes(evmCfg.CorrectFineFO,{'logical','double'},{'nonempty'},fcnName,'CorrectFineFO');
+    end
+    if isfield(evmCfg,'TimeSyncEnable')
+        validateattributes(evmCfg.TimeSyncEnable,{'logical','double'},{'nonempty'},fcnName,'TimeSyncEnable');
+    end
+    if isfield(evmCfg,'UseWholeGrid')
+        validateattributes(evmCfg.UseWholeGrid,{'logical','double'},{'nonempty'},fcnName,'UseWholeGrid');
+    end
+    if isfield(evmCfg,'IQImbalance')
+        validateattributes(evmCfg.IQImbalance,{'logical','double'},{'nonempty'},fcnName,'IQImbalance');
+    end
+    if isfield(evmCfg,'ExcludeDC')
+        validateattributes(evmCfg.ExcludeDC,{'logical','double'},{'nonempty'},fcnName,'ExcludeDC');
+    end
+    if isfield(evmCfg,'DCOffset')
+        validateattributes(evmCfg.DCOffset,{'logical','double'},{'nonempty'},fcnName,'DCOffset');
+    end
+end
+
+function [waveformResources] = waveformResourcesRepeat(waveformResources,period,repLen)
+%   Regenerate PDSCH and PDCCH configuration reference resources based on
+%   waveform period and number of waveform repetitions
+
+    % Replicate configuration resources for each waveform repetition
+    for repIdx = 1:ceil(repLen/period)-1
+
+        % remSlots is used to repeat resources for slots which
+        % are not integer multiples of waveform period 
+        remSlots = mod(repLen,period);
+
+        % Loop over all PDSCH and PDCCH configurations
+        for cIdx = 1:2
+            if cIdx == 1
+                str = 'PDSCH';
+            else
+                str = 'PDCCH';
+            end
+
+            % Replicate configuration resources for each PDSCH or PDCCH
+            for pIdx = 1:size(waveformResources.(str),2)
+
+                % Obtain allocated slots. Replicate across multiple repetitions
+                allocatedSlots = [waveformResources.(str)(pIdx).Resources.NSlot];
+                if isempty(allocatedSlots)
+                    continue;
+                end
+                slotRange = period;
+                if repIdx == ceil(repLen/period)-1 && remSlots~=0
+                    slotRange = remSlots;
+                end
+                waveformResources.(str)(pIdx).Resources = [waveformResources.(str)(pIdx).Resources ...
+                    waveformResources.(str)(pIdx).Resources(allocatedSlots<slotRange)];
+                allocatedslotsRepeated = [waveformResources.(str)(pIdx).Resources.NSlot];
+                l = size(allocatedSlots,2)+1;
+                allocatedslotsRepeated(l:end) = allocatedslotsRepeated(l:end)+ period*repIdx;
+                for idx = 1:size(allocatedslotsRepeated,2)
+                    waveformResources.(str)(pIdx).Resources(idx).NSlot  = allocatedslotsRepeated(idx);
+                end
+            end
+        end
+    end
+end

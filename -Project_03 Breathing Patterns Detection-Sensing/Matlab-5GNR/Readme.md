@@ -1,56 +1,35 @@
-# 5G New Radio Implementation on mmWave 24Ghz
+# **5G NR Waveform Configuration for QPSK**
+## **General Settings**
+- **Duplex Mode:** TDD
+- **Carrier Frequency:** 28 GHz (Upconverted from 2.8 GHz)
+- **Channel Bandwidth:** 20 MHz
+- **Subcarrier Spacing (SCS):** 30 kHz
+- **Number of Resource Blocks (NRB):** 51
+- **Subframes:** 10
+- **Layers:** 1
+- **Cell Identity:** 1
+- **RNTI:** 1
 
-# Downlink FRC Configuration
-A Downlink Fixed Reference Channel waveform for 5G NR is generatated using matlab using the following config
+## **SSB/SIB1 Settings**
+- **SSB Power:** 6 dB
+- **SSB Transmitted Blocks:** `[1 1 0 0]`
+- **SIB1:** Disabled
 
+## **PDSCH Settings**
+- **Modulation:** QPSK / 16QAM / 64QAM
+- **Power:** 3 dB
+- **Slot Allocation:** `[1 2 3 4 5 6 10 11 12 13 14 15 16]`
+- **Code Rate:** 0.3008
+- **PT-RS:** Enabled (Power: 3 dB)
 
-## Downlink FRC Parameters
+## **DM-RS Settings**
+- **DM-RS Configuration Type:** 1
+- **DM-RS Power:** 3 dB
+- **Additional DM-RS Positions:** 2
 
-| Parameter                 | Value                          |
-|---------------------------|--------------------------------|
-| **Frequency range**       | FR1 (410 MHz - 7.125 GHz)     |
-| **MCS**                   | 64QAM, R=3/4                  |
-| **Subcarrier spacing (kHz)** | 30                         |
-| **Channel bandwidth (MHz)** | 10                          |
-| **Duplex mode**           | FDD                            |
-| **Subframes**             | 10                             |
-| **Layers**                | 1                              |
-| **Cell identity**         | 1                              |
-| **RNTI**                  | 0                              |
-| **OCNG**                  | Enabled                        |
-| **Windowing source**      | Custom                         |
-| **Windowing (%)**         | 0                              |
-| **Sample rate source**    | Auto                           |
-| **Phase compensation**    | Disabled (Unchecked)          |
-
----
-
-## FRC Info
-
-| Parameter                     | Value          |
-|---------------------------------|--------------|
-| **Subcarrier spacing (kHz)**    | 30           |
-| **Allocated RBs**               | 24           |
-| **Modulation**                  | 64QAM        |
-| **Target code rate**            | 3/4          |
-| **Payload (bits/slot)**         | 11784        |
-| **PDSCH mapping type**          | A            |
-| **Allocated symbols**           | [2, 12]      |
-| **DM-RS configuration type**    | 1            |
-| **Additional DM-RS positions**  | 2            |
-| **First DM-RS position**        | 2            |
-| **Rate matching overhead**      | 0            |
-
----
-
-
-## Generated Signal Output
-
-### Time Scope
-![Time-Signal](images/waveformTime.png)
-
-### Spectorgram
-![Frequency-Spectrum](images/waveformspectrum.png)
-
-### Resource Grids
-![Resource-Grid](images/waveformresourcegrid.png)
+## **CSI-RS Settings**
+- **Enabled:** Yes
+- **Power:** 3 dB
+- **Type:** NZP (Non-Zero Power)
+- **Periodicity:** 1 Slot
+- **RB Coverage:** 51 RBs (Full Bandwidth)
