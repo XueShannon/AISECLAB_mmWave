@@ -4,7 +4,7 @@
 - [ ] **Define research problem, objectives, and scope** *(Feb 12-13, 2025)*
 - [ ] **Conduct a thorough literature review** *(Feb 14-16, 2025)*
 - [ ] **Outline methodology and experimental setup** *(Feb 17, 2025)*
-- [ ] **Testbed preparation (parallel work)** *(Feb 12-17, 2025)*
+- [x] **Testbed preparation (parallel work)** *(Feb 12-17, 2025)*
 #### **Phase 1 Deadline:** **Feb 17, 2025**  
 
 ---
