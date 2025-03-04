@@ -102,3 +102,20 @@
 | RB Offset       | 0                    |
 | nID             | 1                    |
 | Label           | CSIRS1               |
+
+### Resource Grids
+The generated signal consists of a single frame of duration 10ms, with resources allocated 
+across 20 slots as shown in figure below.
+
+![Resource-Grid](/images/waveformresourcegrid.png)
+
+and the individual Reource Elements are
+
+#### PDCCH RE
+<img src="./images/pdcchre.png" alt="PDCCH-RE" style="width:500px; height:auto;">
+
+#### PDSCH RE
+<img src="./images/pdschre.png" alt="PDCCH-RE" style="width:500px; height:auto;">
+
+#### CSI-RS RE
+<img src="./images/csi-rsre.png" alt="PDCCH-RE" style="width:500px; height:auto;">
