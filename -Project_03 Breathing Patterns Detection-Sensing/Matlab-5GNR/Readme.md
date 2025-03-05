@@ -107,7 +107,7 @@
 The generated signal consists of a single frame of duration 10ms, with resources allocated 
 across 20 slots as shown in figure below.
 
-![Resource-Grid](/images/waveformresourcegrid.png)
+<img src="./images/waveformresourcegrid.png" alt="PDCCH-RE">
 
 and the individual Reource Elements are
 
