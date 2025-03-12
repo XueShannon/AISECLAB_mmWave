@@ -3,25 +3,24 @@
 
 ### General Settings
 
-| Parameter                  | Value                                                |
-| -------------------------- | ---------------------------------------------------- |
-| Modulation                 | QPSK, R = 1/3; 16QAM R = 3/4; 64QAM R= 3/4 (To test) |
-| Subcarrier Spacing         | 30 kHz                                               |
-| Channel Bandwidth          | 20MHz                                                |
-| Allocated Resource Blocks  | 51                                                   |
-| PDSCH Mappting             | Type A                                               |
-| Allocated Symbols          | [2 12]                                               |
-| DM-RS config               | Type 1                                               |
-| Additional DM-RS positions | 2                                                    |
-| First DM-RS Position       | 2                                                    |
-| Duplex Mode                | FDD                                                  |
-| Subframes                  | 10                                                   |
-| Layers                     | 1                                                    |
-| Cell Identity              | 1                                                    |
-| RNTI                       | 0                                                    |
-| Windowing                  | Auto                                                 |
-| Sample Rate                | 30.72MHz (Auto)                                      |
-| Phase Compensation         | 2.8GHz                                               |
+| Parameter                  | Value         |
+| -------------------------- | ------------- |
+| Modulation                 | 16QAM R = 3/4 |
+| Subcarrier Spacing         | 30 kHz        |
+| Channel Bandwidth          | 40MHz         |
+| Allocated Resource Blocks  | 51            |
+| PDSCH Mapping              | Type A        |
+| Allocated Symbols          | [2 12]        |
+| DM-RS config               | Type 1        |
+| Additional DM-RS positions | 2             |
+| First DM-RS Position       | 2             |
+| Duplex Mode                | TDD           |
+| Layers                     | 1             |
+| Cell Identity              | 1             |
+| RNTI                       | 0             |
+| Windowing                  | Auto          |
+| Sample Rate                | 50Mhz         |
+| Phase Compensation         | 2.8GHz        |
 
 
 ### SSB Config
@@ -29,7 +28,7 @@
 | Parameter                   | Value                    |
 | --------------------------- | ------------------------ |
 | Block Pattern               | Case B                   |
-| Transmitted Blocks          | [1 0 0 0]                |
+| Transmitted Blocks          | [1 1 0 0]                |
 | Period                      | 10 ms                    |
 | Frequncy Offset             | Carrier Center           |
 | SCS Common                  | 30                       |
@@ -45,10 +44,10 @@
 | ------------------------- | -------- |
 | BWP ID                    | 1        |
 | Num Layers                | 1        |
-| Slot Allocation (0-Based) | [1 : 19] |
-| Period                    | 20       |
+| Slot Allocation (0-Based) | [2 : 39] |
+| Period                    | 40       |
 | VRB Set                   | [0 : 50] |
-| Coding Rate               | 0.3008   |
+| Coding Rate               | 0.3320   |
 | Phase Tracking RS         | Enabled  |
 
 ### Coreset Config
@@ -76,10 +75,10 @@
 | ------------------ | ------------ |
 | BWP ID             | 1            |
 | Search Space ID    | 1            |
-| Aggregation Level  | 8            |
+| Aggregation Level  | 2            |
 | Candidate          | 1            |
-| Allocated Slots    | [1 : 19]     |
-| Period             | 4            |
+| Allocated Slots    | [2 : 39]     |
+| Period             | 5            |
 | Coding             | Enabled      |
 | Payload Size       | 20 bits      |
 | Data Source        | PN9 Sequence |
@@ -94,7 +93,7 @@
 | BWP ID          | 1                    |
 | Type            | non-zero power (nzp) |
 | Periodic        | True                 |
-| Period(slots)   | 4                    |
+| Period(slots)   | 5                    |
 | Offset          | 0                    |
 | Density         | 3                    |
 | Symbol Location | 0                    |
