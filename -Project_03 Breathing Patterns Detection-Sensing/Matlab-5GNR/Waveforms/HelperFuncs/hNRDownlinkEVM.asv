@@ -447,7 +447,6 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
             temp = [pdschArray(:).PDSCH];
             unEqualNumLayersFlag = ~(all(temp(1).NumLayers == [temp.NumLayers]));
             maxLayers = max([temp.NumLayers]);
-            clear temp;
 
             % Ensure there is at least 1 valid RNTI for this BWP
             rntiNotFoundFlag = true;
