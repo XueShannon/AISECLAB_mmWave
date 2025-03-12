@@ -473,7 +473,7 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
                 l = size(tmpRefGrid,3);
                 refGrid(:,:,1:l) = refGrid(:,:,1:l)+ tmpRefGrid;
             end
-            
+            clear tmpRefGrid;
             % Shift frequency of the waveform, taking into account the 'k0' for the current BWP
             t = (0:size(rxWaveform,1)-1).'/sampleRate;
             k0Offset = k0*scs*1e3;
@@ -572,7 +572,7 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
             else
                 refGrid = hReferenceGrid(carrier,bwpCfg,pdschArray,nSlots,'PDSCH');
             end
-            
+            clear tmpRefGrid;
             % Adjust 'refGrid' according to the BWP dimensions
             if ~isempty(refGrid)
                 bwpStart = bwpCfg.NStartBWP-carrier.NStartGrid;
