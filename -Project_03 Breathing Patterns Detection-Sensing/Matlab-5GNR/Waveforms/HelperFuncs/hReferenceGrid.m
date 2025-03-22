@@ -88,7 +88,7 @@ function [refGrid,idealGrid] = hReferenceGrid(carrier,bwpCfg,configArray,nSlots,
     % Place the bwpGrid in a carrier grid (at an appropriate
     % location) in case the BWP size is not the same as the carrier grid
     for slotIdx=carrier.NSlot+(0:nSlots-1)
-        isDataSlot = ~isempty(find(slotIdx == slotRange,1));
+        isDataSlot = ~isempty(find(mod(slotIdx,waveformPeriod) == slotRange,1));
         if genPdschRefGrid
             [dataInd,dataSym,dmrsIndices,dmrsSymbols] = hSlotResources(configArray,mod(slotIdx,waveformPeriod));
         elseif genPuschRefGrid

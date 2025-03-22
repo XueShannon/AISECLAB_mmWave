@@ -281,6 +281,12 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
     else
         dcOffsetFlag = cfg.DCOffset;
     end
+    if ~isfield(cfg,'FileName')
+        filename = 'Resources_';
+    else
+        filename = cfg.FileName;
+    end
+
 
     % Derive per-slot resources (waveformResources) used as reference for EVM calculation
     [~,winfo] = nrWaveformGenerator(waveConfig);
@@ -489,7 +495,6 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
                 integerCfoHz = hNRFrequencyOffset('integerFO',carrier,rxWaveformk0Shifted,refGrid,sampleRate,waveConfig.CarrierFrequency+k0Offset);
                 rxWaveformk0Shifted = hNRFrequencyOffset('FOCorrect',rxWaveformk0Shifted,sampleRate,integerCfoHz);
             end
-            clear refGrid;
             % Estimate and correct the I/Q imbalance for the received waveform
             ampImbEst = 0;
             phImbEst = 0;
@@ -531,7 +536,7 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
                 end
             end
             rxWaveform = rxWaveformk0Shifted(1+offset:end,:);
-            clear rxWaveformk0Shifted;
+            clear rxWaveformk0Shifted refGrid;
             % Get OFDM information for the given sample rate
             opts.cyclicPrefix = carrier.CyclicPrefix;
             opts.SampleRate = sampleRate;
@@ -995,6 +1000,8 @@ function [evmInfo,eqSymBwp,refSymBwp] = hNRDownlinkEVM(waveConfig,rxWaveform,cfg
                     numLayers = currentCfg.PDSCH.NumLayers;
                     cEq= eqSlotGrid(:,:,1:numLayers,:);
                     cRef = refSlotGrid(:,:,1:numLayers,:);
+                    filename = filename + "_eqGrid.mat";
+                    save(filename,'cEq','-v7.3');
 
                     % Combine the channel specific equalized and reference
                     % grids on a BWP basis. Ensure the dimensions match by
