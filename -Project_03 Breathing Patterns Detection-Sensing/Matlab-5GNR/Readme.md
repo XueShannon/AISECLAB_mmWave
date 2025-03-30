@@ -6,9 +6,9 @@
 | Parameter                  | Value         |
 | -------------------------- | ------------- |
 | Modulation                 | 16QAM R = 3/4 |
-| Subcarrier Spacing         | 30 kHz        |
+| Subcarrier Spacing         | 60 kHz        |
 | Channel Bandwidth          | 40MHz         |
-| Allocated Resource Blocks  | 51            |
+| Allocated Resource Blocks  | 20            |
 | PDSCH Mapping              | Type A        |
 | Allocated Symbols          | [2 12]        |
 | DM-RS config               | Type 1        |
@@ -22,38 +22,22 @@
 | Sample Rate                | 50Mhz         |
 | Phase Compensation         | 2.8GHz        |
 
-
-### SSB Config
-
-| Parameter                   | Value                    |
-| --------------------------- | ------------------------ |
-| Block Pattern               | Case B                   |
-| Transmitted Blocks          | [1 1 0 0]                |
-| Period                      | 10 ms                    |
-| Frequncy Offset             | Carrier Center           |
-| SCS Common                  | 30                       |
-| Payload                     | Master Information Block |
-| Cell barred                 | No                       |
-| Intra-frequency Reselection | No                       |
-| PDCCH Config SIB1           | 0                        |
-
-
 ### PDSCH Config
 
 | Parameter                 | Value    |
 | ------------------------- | -------- |
 | BWP ID                    | 1        |
 | Num Layers                | 1        |
-| Slot Allocation (0-Based) | [2 : 39] |
+| Slot Allocation (0-Based) | [0 : 39] |
 | Period                    | 40       |
-| VRB Set                   | [0 : 50] |
+| VRB Set                   | [0 : 19] |
 | Coding Rate               | 0.3320   |
 | Phase Tracking RS         | Enabled  |
 
 ### Coreset Config
 | Parameter           | Value             |
 | ------------------- | ----------------- |
-| Frequency Resources | [1 1 1 1 1 1 1 1] |
+| Frequency Resources | [1 1 1] |
 | Duration            | 2                 |
 | CCE-REG Mapping     | Non-Interleaved   |
 
@@ -66,7 +50,7 @@
 | Slot Period           | 1            |
 | Slot offset           | 0            |
 | Duration              | 1            |
-| Candidate Aggregation | [8 8 4 2 1]  |
+| Candidate Aggregation | [8 1 1 0 0]  |
 | Label                 | SearchSpace1 |
 
 ### PDCCH
@@ -79,8 +63,8 @@
 | Candidate          | 1            |
 | Allocated Slots    | [2 : 39]     |
 | Period             | 5            |
-| Coding             | Enabled      |
-| Payload Size       | 20 bits      |
+| Coding             | Disabled      |
+| Payload Size       | N/A      |
 | Data Source        | PN9 Sequence |
 | RNTI               | 0            |
 | DMRS Scrambling ID | 1            |
@@ -97,7 +81,7 @@
 | Offset          | 0                    |
 | Density         | 3                    |
 | Symbol Location | 0                    |
-| NRB             | 51                   |
+| NRB             | 20                   |
 | RB Offset       | 0                    |
 | nID             | 1                    |
 | Label           | CSIRS1               |

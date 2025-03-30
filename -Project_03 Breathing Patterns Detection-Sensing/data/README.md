@@ -14,13 +14,18 @@
 
 As shown in plots each type of respiration pattern shows a different plot
 in slow-time signals, the number of breaths from this visualization can be clearly estimated. 
-To further improve the isolation of respiration signal the slow-time signal is band-pass 
-filtered at 0-0.55hz giving enough margin for our respiratory rate ranges from 3-15 breaths 
-(0.1 - 0.5Hz) for 30 secs.
 
-<!-- Plots -->
-### Filtered Slow Time Signal
-![filtered-slow-signal](images/filtered_signal.png)
+The raw signal is then smoothened using a median filter and detrending environmental drifts
+
+![median-filtered](images/Median_filtered.png)
+
+This Signal is then EWT Decomposed into 3 modes to isolate the the breathing signal
+
+![ewt-transform](images/ewts.png)
+
+Finally the amplitude variations due to environmental noise and other factors from the breating signal component of ewt are eliminated by using a Hilbert Transformation and normalizing amplitude jumps across the signal to get a more idealized breathing pattern.
+
+![extract-pattern](images/finals.png)
 
 
 
