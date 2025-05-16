@@ -46,6 +46,8 @@ We achieve a Communication Throughput of 11.42Mbps and average evm of 10-14%.
 
 ![spectrum-analysis](ofdm/siganalysis.png)
 
+![evm](ofdm/evms.png)
+
 Above figure shows the summary of compensations and EVM for a typical sample.\
 **Note: PDCCH EVM is offset by 150% due to waveform customisation.**
 
